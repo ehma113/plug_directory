@@ -93,6 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8,} # CEO FIX: Force minimum 8 characters!
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -124,18 +125,21 @@ STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Paystack Test Keys
-PAYSTACK_PUBLIC_KEY = 'pk_test_d482e0398d9c35d8a31c8a896344a27820ec9ae0'
-PAYSTACK_SECRET_KEY = 'sk_test_01eba7c43824f863fafa1389efdcc3fbbaab894a'
+# PAYSTACK LIVE KEYS (REAL MONEY)
+# CEO TODO: Go to your Paystack Dashboard, toggle to LIVE MODE, and paste the keys below!
+PAYSTACK_PUBLIC_KEY = 'pk_live_283f33ee8fa2c8bfc53fd77abe1f7cbae83c5637'
+PAYSTACK_SECRET_KEY = 'sk_live_1af906d0006db80e9358a036ad42e8a96a130a94'
 
 
-# CEO FIX: Switch to SSL Port to bypass network firewall
+# CEO FIX: Email Backend Configuration (Gmail SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465           # <--- CHANGED FROM 587
-EMAIL_USE_SSL = True       # <--- CHANGED FROM EMAIL_USE_TLS
-EMAIL_USE_TLS = False      # <--- SET TO FALSE
+EMAIL_PORT = 465           
+EMAIL_USE_SSL = True       
+EMAIL_USE_TLS = False      
 EMAIL_HOST_USER = 'ehma1023@gmail.com'
-EMAIL_HOST_PASSWORD = 'xgkgltahfqwhiymt' # Make sure no spaces!
+EMAIL_HOST_PASSWORD = 'xgkgltahfqwhiymt' 
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')

@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib import messages # CEO FIX: Added for Help page
+from django.core.exceptions import ValidationError # CEO FIX: Added for Password Shield
 import requests
 
 from .models import Vendor, VendorGallery, VendorNiche, PaymentAuth
@@ -101,19 +102,24 @@ def help_page(request):
         
         full_message = f"New Support Ticket:\n\nFrom: {name} ({email})\nType: {issue_type}\n\nMessage:\n{message_body}"
         
-        # CEO DEBUG MODE: Removed try/except to see the real error!
-        from django.core.mail import send_mail
-        send_mail(
-            f'Support Ticket: {issue_type}',
-            full_message,
-            settings.DEFAULT_FROM_EMAIL, 
-            ['ehma1023@gmail.com'], 
-            fail_silently=False,
-        )
+        try:
+            from django.core.mail import send_mail
+            send_mail(
+                f'Support Ticket: {issue_type}',
+                full_message,
+                settings.DEFAULT_FROM_EMAIL, 
+                ['ehma1023@gmail.com'], 
+                fail_silently=False,
+            )
+            messages.success(request, 'Message sent! We\'ll get back to you shortly.')
+        except Exception:
+            messages.error(request, 'Something went wrong. Please try again or email us directly.')
             
         return redirect('help_page')
     
     return render(request, 'help.html')
+
+
 # ==========================================
 # 2. VENDOR AUTH PAGES (Login / Register / Logout)
 # ==========================================
@@ -141,24 +147,29 @@ def vendor_register(request):
             error = "A vendor with this WhatsApp number already exists. Please Log In."
 
         if not error:
-            user = User.objects.create_user(username=whatsapp_number, email=email, password=password1)
-            
-            vendor = Vendor.objects.create(
-                user=user,
-                shop_name=shop_name,
-                category=category,
-                location=location,
-                whatsapp_number=whatsapp_number,
-                description=description,
-                instagram_link=instagram_link,
-                profile_image=profile_image,
-                cover_image=cover_image,
-                is_premium=False,     
-                has_used_trial=False, 
-            )
+            try:
+                user = User.objects.create_user(username=whatsapp_number, email=email, password=password1)
+                
+                vendor = Vendor.objects.create(
+                    user=user,
+                    shop_name=shop_name,
+                    category=category,
+                    location=location,
+                    whatsapp_number=whatsapp_number,
+                    description=description,
+                    instagram_link=instagram_link,
+                    profile_image=profile_image,
+                    cover_image=cover_image,
+                    is_premium=False,     
+                    has_used_trial=False, 
+                )
 
-            login(request, user)
-            return redirect('vendor_dashboard')
+                login(request, user)
+                return redirect('vendor_dashboard')
+                
+            except ValidationError as e:
+                # CEO FIX: Catch weak passwords and show the error nicely!
+                error = " ".join(e.messages) 
 
     return render(request, 'register.html', {'error': error})
 
