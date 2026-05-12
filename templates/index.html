@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spot a Plug — Discover the Best Vendors</title>
+    
+    <!-- TikTok/Social Media Preview Meta Tags -->
+    <meta property="og:title" content="Spot a Plug — Discover the Best Vendors">
+    <meta property="og:description" content="Thrift, Food, Beauty & more. Connect directly via WhatsApp.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GreenSock Animation Platform (GSAP) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Space Grotesk', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'plug': {
+                            'dark': '#050505',
+                            'gray': '#0A0A0A',
+                            'wa': '#25D366',
+                            'ig': '#E1306C',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Global Styles */
+        * { -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #050505; 
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        /* Animated Mesh Gradient Background */
+        .mesh-bg {
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            top: -25%;
+            left: -25%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(225, 48, 108, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(37, 211, 102, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.1) 0%, transparent 60%);
+            animation: meshMove 15s ease-in-out infinite alternate;
+            z-index: -1;
+            filter: blur(60px);
+        }
+        
+        @keyframes meshMove {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-5%, -5%) scale(1.1); }
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+        }
+
+        /* PREMIUM GLOW EFFECT */
+        .premium-glow {
+            border: 1px solid rgba(234, 179, 8, 0.3) !important;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.1);
+        }
+        .premium-glow:hover {
+            border-color: rgba(234, 179, 8, 0.5) !important;
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.2);
+        }
+
+        /* Image Shine Effect on Hover */
+        .shine-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .shine-effect::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -75%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease-in-out;
+            z-index: 2;
+        }
+        .glass-card:hover .shine-effect::after {
+            left: 125%;
+        }
+
+        /* Premium Button Glow */
+        .btn-wa {
+            background: #25D366;
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-wa:hover {
+            box-shadow: 0 0 30px rgba(37, 211, 102, 0.5);
+            transform: scale(1.03);
+        }
+
+        /* Category Scroll Hide Scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Floating Tag Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        .float-anim-delay { animation: float 6s ease-in-out 2s infinite; }
+
+        /* Text Gradient */
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 100% auto; 
+        }
+    </style>
+</head>
+<body class="bg-plug-dark min-h-screen">
+
+    <div class="mesh-bg"></div>
+
+    <!-- Mobile Search Overlay -->
+    <div id="mobile-search-overlay" class="fixed inset-0 bg-plug-dark/95 backdrop-blur-md z-[60] p-4 hidden flex-col">
+        <div class="flex items-center gap-3 mb-6">
+            <button onclick="closeMobileSearch()" class="text-white">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </button>
+            <input 
+                type="text" 
+                id="mobile-smart-search" 
+                class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl pl-4 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-plug-wa/50 transition" 
+                placeholder="Search 'Thrift', 'Food', 'Lagos'..."
+                autocomplete="off"
+            >
+        </div>
+        <div id="mobile-search-results" class="overflow-y-auto flex-grow"></div>
+    </div>
+
+    <!-- Premium Sticky Nav -->
+    <nav class="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
+        <div class="max-w-5xl mx-auto glass-card rounded-2xl px-5 py-3 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2 flex-shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-plug-ig to-plug-wa flex items-center justify-center">
+                    <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                </div>
+                <span class="font-display font-bold text-lg tracking-tight">Spot a Plug</span>
+            </a>
+            
+            <!-- Smart Search Container (Desktop Only) -->
+            <div class="relative flex-1 max-w-xs mx-4 hidden md:block">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500"></i>
+                    <input 
+                        type="text" 
+                        id="smart-search" 
+                        class="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-plug-wa/50 transition" 
+                        placeholder="Search 'Thrift', 'Food'..."
+                        autocomplete="off"
+                    >
+                </div>
+                <div id="search-results" class="absolute top-full mt-2 left-0 right-0 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-2xl shadow-black/50 hidden z-50 max-h-80 overflow-y-auto"></div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+                <!-- Mobile Search Icon -->
+                <button onclick="openMobileSearch()" class="text-zinc-400 hover:text-white transition-colors md:hidden">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                
+                <!-- Auth Links -->
+                <a href="/login/" class="text-zinc-400 hover:text-white transition-colors text-xs font-medium hidden sm:block">Log in</a>
+                
+                <!-- THE MAGIC BUTTON -->
+                <a href="/register/" class="bg-white/10 border border-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> 
+                    <span class="hidden sm:inline">List Your Plug</span>
+                    <span class="sm:hidden">Sell</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 pt-28 pb-12">
+
+        <!-- Hero Section -->
+        <section class="mb-16 text-center relative">
+            <div class="absolute top-0 left-10 float-anim opacity-50 hidden md:block">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1 text-xs flex items-center gap-1">
+                    <span class="w-2 h-2 bg-plug-wa rounded-full"></span> Trusted Vendors
+                </div>
+            </div>
+            <div class="absolute bottom-0 right-10 float-anim-delay opacity-50 hidden md:block">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1 text-xs flex items-center gap-1">
+                    <i data-lucide="shield-check" class="w-3 h-3 text-blue-400"></i> Verified Plugs
+                </div>
+            </div>
+
+            <div class="overflow-hidden flex justify-center">
+                <h1 id="hero-text" class="font-display font-bold text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.9] text-gradient w-max text-center">
+                    Discover Your<br>Next Favorite Plug
+                </h1>
+            </div>
+            
+            <p id="hero-sub" class="mt-6 text-zinc-400 text-base md:text-lg max-w-md mx-auto font-light leading-relaxed">
+                Curated vendors for fashion, food, and beauty. Connect instantly, no stress.
+            </p>
+            
+            <div id="hero-cta" class="mt-8 flex justify-center gap-4 opacity-0">
+                <a href="#vendors" class="btn-wa text-black font-semibold px-6 py-3 rounded-xl flex items-center gap-2 text-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Browse VIP Plugs
+                </a>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-display font-bold text-xl tracking-tight">Categories</h2>
+                <a href="/discover/" class="text-zinc-500 text-sm hover:text-white transition-colors flex items-center gap-1">
+                    View all <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                </a>
+            </div>
+            
+            <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+                <a href="/category/Fashion/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                    <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Fashion">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-3 left-3">
+                        <p class="font-semibold text-sm">Fashion</p>
+                        <p class="text-[10px] text-zinc-300">{{ fashion_count }} Plugs</p>
+                    </div>
+                </a>
+
+                <a href="/category/Food/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Food">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-3 left-3">
+                        <p class="font-semibold text-sm">Food</p>
+                        <p class="text-[10px] text-zinc-300">{{ food_count }} Plugs</p>
+                    </div>
+                </a>
+
+                <a href="/category/Beauty/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                    <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Beauty">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-3 left-3">
+                        <p class="font-semibold text-sm">Beauty</p>
+                        <p class="text-[10px] text-zinc-300">{{ beauty_count }} Plugs</p>
+                    </div>
+                </a>
+
+                <a href="/category/Tech/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                    <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Tech">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-3 left-3">
+                        <p class="font-semibold text-sm">Tech</p>
+                        <p class="text-[10px] text-zinc-300">{{ tech_count }} Plugs</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- DYNAMIC VIP Vendor Listing -->
+        <section id="vendors" class="mb-20">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="font-display font-bold text-xl tracking-tight">VIP Spotlight 🔥</h2>
+                    <p class="text-zinc-500 text-xs mt-1">The top vendors crushing it right now</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {% for vendor in vendors %}
+                <a href="/vendor/{{ vendor.id }}/" class="vendor-card glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row group opacity-0 premium-glow">
+                    
+                    <div class="md:w-40 h-48 md:h-auto overflow-hidden shine-effect">
+                        <img src="{{ vendor.profile_image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ vendor.shop_name }}">
+                    </div>
+
+                    <div class="p-5 flex flex-col justify-between flex-grow">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold text-base group-hover:text-plug-wa transition-colors">{{ vendor.shop_name }}</h3>
+                                
+                                <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30 flex items-center gap-1">
+                                    <i data-lucide="star" class="w-2.5 h-2.5 fill-yellow-400 text-yellow-400"></i> PREMIUM
+                                </span>
+                            </div>
+
+                            <p class="text-zinc-400 text-xs leading-relaxed mb-3">{{ vendor.description|truncatewords:15 }}</p>
+                            
+                            <div class="flex items-center gap-3 text-[10px] text-zinc-500">
+                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ vendor.location }}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3 h-3"></i> {{ vendor.category }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex items-center justify-end">
+                            <span class="text-plug-wa text-xs font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Plug <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                    <div class="col-span-2 text-center py-12 glass-card rounded-2xl p-8">
+                        <i data-lucide="crown" class="w-10 h-10 text-yellow-400 mx-auto mb-4"></i>
+                        <p class="text-zinc-400 text-sm mb-2">The VIP Spotlight is currently empty.</p>
+                        <p class="text-zinc-500 text-xs mb-6">Be the first to claim the homepage and get all the buyer traffic!</p>
+                        <a href="/upgrade/" class="inline-flex items-center gap-2 bg-plug-wa text-black font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-plug-wa/90 transition">
+                            Claim Top Spot Now
+                        </a>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="text-center py-16 border-t border-zinc-800/50">
+            <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-zinc-300 px-4 py-1.5 rounded-full text-xs font-semibold mb-6">
+                <i data-lucide="zap" class="w-3 h-3"></i> GET DISCOVERED TODAY
+            </div>
+            
+            <div class="flex justify-center">
+                <h2 class="font-display font-bold text-3xl md:text-4xl tracking-tight mb-4 text-gradient w-max text-center">Got a business?</h2>
+            </div>
+            
+            <p class="text-zinc-500 max-w-sm mx-auto text-sm mb-8">List your plug for free. Reach thousands of buyers instantly and upgrade to Premium when you're ready for the top spot.</p>
+            <a href="/register/" class="inline-flex items-center gap-2 bg-white text-black font-semibold px-8 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm">
+                List Your Plug <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800/50 py-8 text-center text-zinc-600 text-xs">
+        <p>&copy; 2024 Spot a Plug. All rights reserved.</p>
+        <div class="flex justify-center gap-6 mt-4">
+            <a href="/help/" class="hover:text-white transition-colors">Help Center</a>
+            <a href="https://www.instagram.com/spotaplug/" class="hover:text-white transition-colors">Instagram</a>
+            <a href="https://www.tiktok.com/@ehma113" class="hover:text-white transition-colors">TikTok</a>
+            
+        </div>
+    </footer>
+
+    <!-- GSAP Animation Script -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Register GSAP Plugin
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Animations Timeline
+        const heroTl = gsap.timeline({ defaults: { ease: "power4.out" }});
+        
+        heroTl
+            .from("#hero-text", {
+                y: 100,
+                opacity: 0,
+                duration: 1.2,
+            })
+            .from("#hero-sub", {
+                y: 20,
+                opacity: 0,
+                duration: 0.8,
+            }, "-=0.6")
+            .to("#hero-cta", {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+            }, "-=0.4");
+
+        // Category Scroll Animation
+        gsap.to(".cat-card", {
+            x: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: ".cat-card",
+                start: "top 90%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Vendor Card Scroll Animation
+        gsap.utils.toArray('.vendor-card').forEach((card, i) => {
+            gsap.to(card, {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                delay: i % 2 * 0.15,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+    </script>
+
+        <!-- Smart Search Logic (Desktop + Mobile) -->
+    <script>
+        // --- DESKTOP SEARCH ---
+        const searchInput = document.getElementById('smart-search');
+        const resultsContainer = document.getElementById('search-results');
+        let debounceTimer;
+
+        if(searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                if (query.length < 2) {
+                    resultsContainer.classList.add('hidden');
+                    return;
+                }
+                debounceTimer = setTimeout(() => fetchSearchResults(query, resultsContainer), 300);
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (searchInput && !searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+                resultsContainer.classList.add('hidden');
+            }
+        });
+
+        // --- MOBILE SEARCH ---
+        const mobileOverlay = document.getElementById('mobile-search-overlay');
+        const mobileSearchInput = document.getElementById('mobile-smart-search');
+        const mobileResultsContainer = document.getElementById('mobile-search-results');
+
+        function openMobileSearch() {
+            mobileOverlay.classList.remove('hidden');
+            mobileOverlay.classList.add('flex');
+            setTimeout(() => mobileSearchInput.focus(), 100);
+        }
+
+        function closeMobileSearch() {
+            mobileOverlay.classList.add('hidden');
+            mobileOverlay.classList.remove('flex');
+            mobileSearchInput.value = '';
+            mobileResultsContainer.innerHTML = '';
+        }
+
+        if(mobileSearchInput) {
+            mobileSearchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const query = this.value.trim();
+                if (query.length < 2) {
+                    mobileResultsContainer.innerHTML = '';
+                    return;
+                }
+                debounceTimer = setTimeout(() => fetchSearchResults(query, mobileResultsContainer), 300);
+            });
+        }
+
+        // --- SHARED FETCH FUNCTION ---
+        async function fetchSearchResults(query, targetContainer) {
+            targetContainer.innerHTML = `<div class="p-4 text-xs text-zinc-500 text-center animate-pulse">Searching...</div>`;
+            if (targetContainer === resultsContainer) targetContainer.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    targetContainer.innerHTML = `<div class="p-4 text-xs text-zinc-500 text-center">No plugs found for "${query}"</div>`;
+                    return;
+                }
+
+                let html = '';
+                data.forEach(vendor => {
+                    const premiumBadge = vendor.is_premium ? `<span class="ml-2 text-[9px] font-bold bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded border border-yellow-500/30">⭐ VIP</span>` : '';
+                    
+                    html += `
+                        <a href="/vendor/${vendor.id}/" class="flex items-center gap-3 p-3 hover:bg-zinc-800 transition-colors border-b border-zinc-800/50 last:border-0">
+                            <img src="${vendor.image}" class="w-10 h-10 rounded-lg object-cover flex-shrink-0 ${vendor.is_premium ? 'border border-yellow-500/30' : ''}" alt="${vendor.name}">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-white truncate">${vendor.name} ${premiumBadge}</p>
+                                <p class="text-[11px] text-zinc-500">${vendor.category} • ${vendor.location}</p>
+                            </div>
+                            <i data-lucide="arrow-up-right" class="w-4 h-4 text-zinc-600 flex-shrink-0"></i>
+                        </a>
+                    `;
+                });
+
+                targetContainer.innerHTML = html;
+                lucide.createIcons();
+
+            } catch (error) {
+                targetContainer.innerHTML = `<div class="p-4 text-xs text-zinc-500 text-center">Error searching. Try again.</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

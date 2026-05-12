@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discover Niches - Spot a Plug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] }, colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; color: white; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        .niche-box { position: relative; overflow: hidden; border-radius: 1.25rem; cursor: pointer; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .niche-box:hover { transform: translateY(-6px) scale(1.02); }
+        .niche-box img { transition: transform 0.7s ease; }
+        .niche-box:hover img { transform: scale(1.15); }
+        .niche-box::after { content: ''; position: absolute; top: 0; left: -75%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); transition: left 0.7s ease-in-out; z-index: 2; }
+        .niche-box:hover::after { left: 125%; }
+
+        .premium-box { border: 1px solid rgba(37, 211, 102, 0.2); box-shadow: 0 0 15px rgba(37, 211, 102, 0.05); }
+        .premium-box:hover { border-color: rgba(37, 211, 102, 0.5); box-shadow: 0 0 30px rgba(37, 211, 102, 0.15); }
+
+        .text-gradient { background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 100% auto; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <nav class="p-4 flex items-center justify-between border-b border-zinc-800/50">
+        <a href="/" class="flex items-center gap-2 text-zinc-400 hover:text-white transition">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <span class="font-display font-bold text-lg">Discover</span>
+        </a>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-4 pt-8 pb-20">
+
+        <div class="mb-6 text-center main-header">
+            <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tight text-gradient mb-3">What are you looking for?</h1>
+        </div>
+
+        <div id="discover-section" class="relative z-40">
+            
+            <!-- 1. FULL 10 CATEGORIES (Now linked to Django Brain!) -->
+            <section class="mb-16">
+                <h2 class="font-display font-bold text-lg tracking-tight mb-5 flex items-center gap-2">
+                    <i data-lucide="layout-grid" class="w-5 h-5 text-zinc-400"></i> Categories
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <a href="/category/Fashion/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Fashion">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Fashion</p></div>
+                    </a>
+                    <a href="/category/Food/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Food">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Food</p></div>
+                    </a>
+                    <a href="/category/Beauty/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Beauty">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Beauty</p></div>
+                    </a>
+                    <a href="/category/Hair & Wigs/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Hair">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Hair & Wigs</p></div>
+                    </a>
+                    <a href="/category/Real Estate/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Real Estate">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Real Estate</p></div>
+                    </a>
+                    <a href="/category/Automobiles/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Autos">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Automobiles</p></div>
+                    </a>
+                    <a href="/category/Tech/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Tech">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Tech</p></div>
+                    </a>
+                    <a href="/category/Home & Decor/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Home">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Home & Decor</p></div>
+                    </a>
+                    <a href="/category/Events & Printing/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Events">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Events & Printing</p></div>
+                    </a>
+                    <a href="/category/Health & Fitness/" class="niche-box aspect-[3/4] relative group opacity-0 cat-anim">
+                        <img src="https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0" alt="Health">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10"><p class="font-display font-bold text-lg sm:text-xl">Health & Fitness</p></div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 2. SPECIFIC NICHES (Dynamic from Database) -->
+            <section class="mb-16">
+                <h2 class="font-display font-bold text-lg tracking-tight mb-5 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-plug-wa"></i> Specific Niches</h2>
+                <p class="text-zinc-500 text-xs mb-6 -mt-3">Find exactly what you're looking for. Created by VIP Vendors.</p>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {% for niche in niches %}
+                    <a href="/vendor/{{ niche.vendor.id }}/" class="premium-box niche-box aspect-square relative group bg-zinc-900 opacity-0 niche-anim">
+                        {% if niche.image %}
+                            <img src="{{ niche.image.url }}" class="w-full h-full object-cover absolute inset-0 opacity-50" alt="{{ niche.name }}">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover absolute inset-0 opacity-50" alt="Niche">
+                        {% endif %}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 z-10">
+                            <p class="font-semibold text-sm text-white">{{ niche.name }}</p>
+                            <p class="text-zinc-400 text-[10px] mt-1">Under {{ niche.vendor.category }}</p>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="col-span-4 text-center py-8">
+                        <p class="text-zinc-600 text-sm">No custom niches created yet. Premium vendors can create these!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        gsap.from(".main-header", { y: 30, opacity: 0, duration: 0.8, ease: "power3.out" });
+        gsap.utils.toArray('.cat-anim').forEach((box, i) => { gsap.to(box, { opacity: 1, y: 0, duration: 0.6, delay: 0.3 + i * 0.08, ease: "power2.out" }); });
+        gsap.utils.toArray('.niche-anim').forEach((box, i) => { gsap.to(box, { opacity: 1, y: 0, duration: 0.6, delay: i * 0.08, ease: "power2.out" }); });
+    </script>
+</body>
+</html>

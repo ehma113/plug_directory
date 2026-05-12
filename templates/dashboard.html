@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - Spot a Plug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] }, colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; color: white; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .mesh-bg { position: fixed; width: 100%; height: 100%; top: 0; left: 0; background: radial-gradient(circle at 80% 20%, rgba(37, 211, 102, 0.05) 0%, transparent 50%); z-index: -1; filter: blur(60px); }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(37, 211, 102, 0.2); } 50% { box-shadow: 0 0 25px rgba(37, 211, 102, 0.5); } }
+        .glow-btn { animation: pulse-glow 3s infinite; }
+        .locked-overlay { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        .dash-faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .dash-faq-answer.open { max-height: 300px; padding-top: 0.75rem; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="mesh-bg"></div>
+
+    <nav class="p-4 flex justify-between items-center border-b border-zinc-800/50">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-plug-ig to-plug-wa flex items-center justify-center"><i data-lucide="zap" class="w-4 h-4 text-white"></i></div>
+            <span class="font-display font-bold text-lg tracking-tight">Dashboard</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/vendor/{{ vendor.id }}/" target="_blank" class="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition"><i data-lucide="store" class="w-3 h-3"></i> View Shop</a>
+            <a href="/logout/" class="text-xs bg-red-500/10 text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition">Logout</a>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto p-6 pb-24 space-y-6">
+
+        <!-- DYNAMIC Plan Status -->
+        <div class="glass-card rounded-2xl p-5 flex items-center justify-between dash-status">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center"><i data-lucide="layout-list" class="w-5 h-5 text-zinc-400"></i></div>
+                <div>
+                    <p class="text-xs text-zinc-500">Current Plan</p>
+                    {% if vendor.is_premium %}
+                        <h3 class="font-display font-bold text-lg flex items-center gap-2">Premium Listing <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">VIP ⭐</span></h3>
+                    {% else %}
+                        <h3 class="font-display font-bold text-lg flex items-center gap-2">Standard Listing <span class="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full">BASIC</span></h3>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if not vendor.is_premium %}
+                <div class="text-right">
+                    <p class="text-xs text-zinc-500">Shop Photos</p>
+                    <p class="font-bold text-sm {{ vendor.can_upload|yesno:'text-plug-wa,text-red-400' }}">{{ vendor.photo_count }} / 10</p>
+                </div>
+            {% else %}
+                <div class="text-right">
+                    <p class="text-xs text-zinc-500">Shop Photos</p>
+                    <p class="font-bold text-sm text-plug-wa">Unlimited ♾️</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- DYNAMIC Upsell Logic -->
+        {% if not vendor.is_premium %}
+            <div class="relative overflow-hidden bg-gradient-to-r from-zinc-900 via-zinc-900 to-green-900/20 border border-plug-wa/20 rounded-2xl p-6 dash-upsell">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-plug-wa/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2"><i data-lucide="rocket" class="w-5 h-5 text-plug-wa"></i><h3 class="font-display font-bold text-lg">Want the Top Spot?</h3></div>
+                        
+                        {% if not vendor.has_used_trial %}
+                            <p class="text-zinc-400 text-sm leading-relaxed max-w-md">Try the Premium spot for <span class="text-white font-semibold">7 Days, absolutely free</span>. Unlock unlimited photos, top placement, and the VIP Badge.</p>
+                        {% else %}
+                            <p class="text-zinc-400 text-sm leading-relaxed max-w-md">Upgrade to Premium for <span class="text-white font-semibold">₦40k/month</span>. Get unlimited photos, top placement, and the VIP Badge.</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if not vendor.has_used_trial %}
+                        <a href="/upgrade/" class="flex-shrink-0 w-full md:w-auto bg-plug-wa text-black font-bold px-8 py-3 rounded-xl text-sm glow-btn text-center">Activate 7-Day Test</a>
+                    {% else %}
+                        <a href="/upgrade/" class="flex-shrink-0 w-full md:w-auto bg-plug-wa text-black font-bold px-8 py-3 rounded-xl text-sm glow-btn text-center">Pay ₦40k to Upgrade</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <!-- VIP STATUS CARD (WITH CANCEL BUTTON) -->
+            <div class="relative overflow-hidden bg-gradient-to-r from-zinc-900 via-zinc-900 to-yellow-900/20 border border-yellow-500/20 rounded-2xl p-6 dash-upsell">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="crown" class="w-6 h-6 text-yellow-400 flex-shrink-0"></i>
+                        <div>
+                            <p class="text-sm text-zinc-300 font-semibold">You are in the <span class="text-yellow-400">Top Spot</span>!</p>
+                            <p class="text-xs text-zinc-500 mt-1">
+                                {% if vendor.premium_expiry_date %}
+                                    Expires {{ vendor.premium_expiry_date|date:"M d, Y" }}
+                                {% else %}
+                                    Active
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <!-- CEO FIX: OPT-OUT BUTTON -->
+                    <form action="/cancel-premium/" method="POST" class="flex-shrink-0">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-lg hover:bg-red-500/20 transition-colors flex items-center gap-1.5 w-full md:w-auto justify-center">
+                            <i data-lucide="x-circle" class="w-3 h-3"></i> Cancel Subscription
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Locked Niches (ONLY SHOW TO STANDARD USERS) -->
+        {% if not vendor.is_premium %}
+        <div class="glass-card rounded-2xl p-5 dash-niches relative overflow-hidden">
+            <div class="relative z-10 locked-overlay">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 class="font-semibold text-sm text-zinc-300 flex items-center gap-2"><i data-lucide="grid-3x3" class="w-4 h-4 text-plug-wa"></i> My Custom Niches</h4>
+                    <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full flex items-center gap-1"><i data-lucide="lock" class="w-3 h-3"></i> PREMIUM</span>
+                </div>
+                <div class="space-y-3 opacity-30 pointer-events-none mb-10">
+                    <div class="flex items-center gap-4 bg-zinc-800/30 rounded-xl p-3 border border-zinc-700/30"><div class="w-14 h-14 rounded-lg bg-zinc-700"></div><div class="flex-1"><div class="h-4 w-28 bg-zinc-700 rounded mb-2"></div><div class="h-3 w-20 bg-zinc-800 rounded"></div></div></div>
+                </div>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 mt-[-20px]">
+                    <div class="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mb-3 border border-zinc-700"><i data-lucide="lock" class="w-5 h-5 text-zinc-500"></i></div>
+                    <p class="font-semibold text-sm text-zinc-300 mb-1">Create Custom Niche Boxes</p>
+                    <p class="text-zinc-600 text-xs mb-4 max-w-[250px]">Stand out by creating hyper-specific categories for your shop.</p>
+                    {% if not vendor.has_used_trial %}
+                        <a href="/upgrade/" class="text-plug-wa text-xs font-bold hover:underline">Activate 7-Day Trial</a>
+                    {% else %}
+                        <a href="/upgrade/" class="text-plug-wa text-xs font-bold hover:underline">Upgrade to Unlock</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4">
+            <div class="glass-card rounded-2xl p-5 text-center dash-stat">
+                <div class="w-10 h-10 mx-auto mb-3 bg-blue-500/10 rounded-xl flex items-center justify-center"><i data-lucide="eye" class="w-5 h-5 text-blue-400"></i></div>
+                <p class="text-2xl font-display font-bold">--</p>
+                <p class="text-[11px] text-zinc-500 mt-1 uppercase tracking-wider">Views</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center dash-stat">
+                <div class="w-10 h-10 mx-auto mb-3 bg-plug-wa/10 rounded-xl flex items-center justify-center"><i data-lucide="message-circle" class="w-5 h-5 text-plug-wa"></i></div>
+                <p class="text-2xl font-display font-bold text-plug-wa">--</p>
+                <p class="text-[11px] text-zinc-500 mt-1 uppercase tracking-wider">WA Clicks</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center dash-stat">
+                <div class="w-10 h-10 mx-auto mb-3 bg-yellow-500/10 rounded-xl flex items-center justify-center"><i data-lucide="trending-up" class="w-5 h-5 text-yellow-400"></i></div>
+                <p class="text-2xl font-display font-bold text-yellow-400">--</p>
+                <p class="text-[11px] text-zinc-500 mt-1 uppercase tracking-wider">Conv. Rate</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="space-y-2 dash-menu">
+            <a href="/edit-shop/" class="glass-card rounded-xl p-4 flex items-center justify-between hover:bg-white/5 transition group">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-zinc-800 rounded-lg flex items-center justify-center group-hover:bg-zinc-700 transition"><i data-lucide="pencil" class="w-4 h-4 text-zinc-400"></i></div>
+                    <span class="text-sm font-medium">Edit Shop Info</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600"></i>
+            </a>
+
+            <a href="/manage-shop/" class="glass-card rounded-xl p-4 flex items-center justify-between hover:bg-white/5 transition group">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-zinc-800 rounded-lg flex items-center justify-center group-hover:bg-zinc-700 transition"><i data-lucide="image-plus" class="w-4 h-4 text-zinc-400"></i></div>
+                    <span class="text-sm font-medium">Manage My Shop (Products)</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600"></i>
+            </a>
+
+            <a href="#vendor-help-center" class="glass-card rounded-xl p-4 flex items-center justify-between hover:bg-white/5 transition group">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-zinc-800 rounded-lg flex items-center justify-center group-hover:bg-zinc-700 transition"><i data-lucide="life-buoy" class="w-4 h-4 text-zinc-400"></i></div>
+                    <span class="text-sm font-medium">Help & Support</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-600"></i>
+            </a>
+        </div>
+
+        <!-- ================= VENDOR HELP CENTER ================= -->
+        <div id="vendor-help-center" class="mt-10 pt-8 border-t border-zinc-800/50">
+            <h2 class="font-display font-bold text-xl tracking-tight mb-4 flex items-center gap-2">
+                <i data-lucide="life-buoy" class="w-5 h-5 text-plug-wa"></i> Vendor Help Center
+            </h2>
+            <p class="text-zinc-500 text-xs mb-6">Common questions about running your shop and getting paid.</p>
+
+            <div class="space-y-3">
+                
+                <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">Why should I upgrade to Premium?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        Premium vendors get the ⭐ VIP Badge, the Golden Glow, and appear at the very top of their category. You also unlock Unlimited Shop Photos and Custom Niches to drive hyper-targeted traffic. Standard shops are limited to 10 photos and cannot create niches.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">How does the 7-Day Free Trial work?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        Click "Activate Trial". A Paystack popup will ask for your card to authorize future payments, but you are charged ₦0 today. You instantly unlock all Premium features. If you love the traffic, do nothing—₦40,000 will be auto-debited after 7 days. If you don't want it, hit "Cancel Subscription" before day 7.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">Why did my upload form disappear?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        Standard shops are capped at 10 Shelf Items. Once you hit 10 photos, the upload form is replaced with an upgrade prompt. To unlock unlimited uploads and show more of your stock, upgrade to Premium!
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">How do buyers contact me and pay?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        When a buyer clicks "Message Shop" on your profile, it opens a direct WhatsApp chat with your number. You handle the negotiation, the deal, and the payment directly. We don't touch your money or take commissions.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">What are Custom Niches?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        Custom Niches are hyper-specific tags (like "UK Used iPhones" or "Vintage Denim") that Premium vendors create. These show up on the main Discover page for all buyers to see, driving highly targeted traffic straight to your shop instead of generic category pages.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">How do I cancel my Premium subscription?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        If you are currently a Premium vendor, you will see a "Cancel Subscription" button at the top of this dashboard. Clicking it will immediately revoke your VIP status and stop any future auto-debits from Paystack. Your profile will revert to Standard.
+                    </div>
+                </div>
+
+                 <div class="faq-item">
+                    <button onclick="toggleDashFaq(this)" class="w-full glass-card rounded-xl p-4 flex justify-between items-center text-left">
+                        <span class="font-medium text-sm pr-4">Why am I not on the Homepage?</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                    </button>
+                    <div class="dash-faq-answer px-4 text-zinc-400 text-xs leading-relaxed">
+                        The Homepage "Spotlight" is reserved exclusively for VIP/Premium vendors. Standard vendors are listed inside their specific category pages. To get on the homepage and get maximum visibility, you need to activate your Premium trial or upgrade.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        gsap.from(".dash-status", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.2 });
+        gsap.from(".dash-upsell", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.4 });
+        gsap.from(".dash-niches", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.5 });
+        gsap.from(".dash-stat", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.6 });
+        gsap.from(".dash-menu", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 1.0 });
+
+        function toggleDashFaq(button) {
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('[data-lucide="chevron-down"]');
+            const isOpen = answer.classList.contains('open');
+
+            document.querySelectorAll('.dash-faq-answer').forEach(a => a.classList.remove('open'));
+            document.querySelectorAll('.faq-item button i').forEach(i => i.style.transform = 'rotate(0deg)');
+
+            if (!isOpen) {
+                answer.classList.add('open');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+</body>
+</html>

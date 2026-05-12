@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Help Center — Spot a Plug</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] }, colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; color: white; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; }
+        .glass-card:hover { background: rgba(255, 255, 255, 0.06); }
+        .text-gradient { background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-answer.open { max-height: 300px; padding-top: 1rem; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Nav -->
+    <nav class="p-4 flex justify-between items-center border-b border-zinc-800/50">
+        <a href="/" class="text-zinc-400 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <span class="font-display font-bold text-lg">Spot a Plug</span>
+        </a>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 pt-12 pb-20">
+        
+        <!-- Header -->
+        <div class="text-center mb-12 main-header">
+            <h1 class="font-display font-bold text-4xl md:text-5xl tracking-tighter text-gradient mb-4">Buyer Help Center</h1>
+            <p class="text-zinc-400 text-sm max-w-md mx-auto">Everything you need to know about finding plugs and buying safely.</p>
+        </div>
+
+        <!-- ================= BUYER FAQs ================= -->
+        <div class="space-y-3 mb-16 faq-section">
+            
+            <h3 class="font-display font-bold text-lg text-zinc-300 mb-4 flex items-center gap-2"><i data-lucide="search" class="w-5 h-5 text-plug-wa"></i> Finding Vendors</h3>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">How do I find a vendor?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    Use the Smart Search bar at the top of the homepage to search by name, category (e.g., "Fashion"), or location (e.g., "Lagos"). Alternatively, click "Discover" to browse all categories and specific niches.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">What are Custom Niches on the Discover page?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    Custom Niches are hyper-specific tags created by top vendors (e.g., "UK Used iPhones" or "Vintage Denim"). If you click on a Niche box, it takes you straight to a vendor who specializes in exactly that item.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">What does the ⭐ VIP badge mean?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    Vendors with the ⭐ VIP badge are Premium Vendors. They are highly active, have unlimited inventory, and appear at the very top of search results and categories. They are committed to providing the best service on the platform.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">Why do some vendors appear at the top of the list with a golden glow?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    Those are our VIP Vendors! They get premium placement because they have upgraded their accounts, meaning they are serious businesses with lots of stock to sell.
+                </div>
+            </div>
+
+            <h3 class="font-display font-bold text-lg text-zinc-300 mb-4 mt-10 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 text-plug-wa"></i> Payments & Buying</h3>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">Do I pay through the Spot a Plug website?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    No. Spot a Plug is a directory, not a store. When you find what you like, click the green "Message Shop" button. This opens a direct WhatsApp chat with the vendor. You discuss the price, delivery, and pay them directly. We never touch your money.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">How do I know the price of an item?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    Vendors often put prices in the captions of their shop photos (e.g., "Vintage Jacket - ₦5k"). If there is no price, click "Message Shop" on their profile to ask them directly on WhatsApp.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">Do I need an account to browse or buy?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    No! Buyers do not need an account. You can search, browse, and click straight to a vendor's WhatsApp completely anonymously.
+                </div>
+            </div>
+
+            <h3 class="font-display font-bold text-lg text-zinc-300 mb-4 mt-10 flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5 text-plug-wa"></i> Safety & Issues</h3>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">Is it safe to buy from vendors here?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    We curate vendors, but because transactions happen off-platform via WhatsApp, we cannot guarantee them. We recommend using trusted payment methods, asking for proof of stock, and using delivery services you trust. VIP vendors are generally the most reliable.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button onclick="toggleFaq(this)" class="w-full glass-card rounded-xl p-5 flex justify-between items-center text-left">
+                    <span class="font-medium text-sm pr-4">How do I report a scam or a bad vendor?</span>
+                    <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-500 flex-shrink-0 transition-transform duration-300"></i>
+                </button>
+                <div class="faq-answer px-5 text-zinc-400 text-xs leading-relaxed">
+                    If a vendor scams you, please use the contact form below immediately. Select "Vendor Complaint / Fraud". We take this very seriously and will ban them from the platform immediately to protect other buyers.
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= CONTACT FORM (NOW HIGHLY VISIBLE) ================= -->
+        <section class="relative overflow-hidden bg-zinc-900/80 border border-zinc-700/50 rounded-2xl p-8 md:p-10 text-center contact-form">
+            <!-- Stronger Glows -->
+            <div class="absolute top-0 right-0 w-40 h-40 bg-plug-wa/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-plug-ig/10 rounded-full blur-3xl -ml-10 -mb-10"></div>
+            
+            <div class="relative z-10">
+                <div class="inline-flex items-center gap-2 bg-plug-wa/10 border border-plug-wa/20 text-plug-wa px-4 py-1.5 rounded-full text-xs font-semibold mb-6">
+                    <i data-lucide="message-circle" class="w-3 h-3"></i> STILL NEED HELP?
+                </div>
+                
+                <h2 class="font-display font-bold text-2xl tracking-tight mb-2 text-white w-max mx-auto text-center">Drop us a message</h2>
+                <p class="text-zinc-400 text-xs mb-8">We usually reply within a few hours.</p>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-6 p-4 rounded-xl text-sm font-medium {% if message.tags == 'success' %}bg-green-500/10 text-green-400 border border-green-500/20{% else %}bg-red-500/10 text-red-400 border border-red-500/20{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="{% url 'help_page' %}" class="max-w-md mx-auto space-y-4 text-left">
+                    {% csrf_token %}
+                    <div>
+                        <label class="text-xs text-zinc-300 mb-1 block font-medium">Your Name</label>
+                        <input type="text" name="name" required class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-plug-wa focus:ring-1 focus:ring-plug-wa transition" placeholder="Jane Doe">
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-300 mb-1 block font-medium">Email Address</label>
+                        <input type="email" name="email" required class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-plug-wa focus:ring-1 focus:ring-plug-wa transition" placeholder="jane@example.com">
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-300 mb-1 block font-medium">Issue Type</label>
+                        <select name="issue_type" required class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-plug-wa focus:ring-1 focus:ring-plug-wa transition appearance-none">
+                            <option value="General Question">General Question</option>
+                            <option value="Bug Report">Website Bug Report</option>
+                            <option value="Vendor Complaint">Vendor Complaint / Fraud</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-300 mb-1 block font-medium">Message</label>
+                        <textarea name="message" rows="4" required class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-plug-wa focus:ring-1 focus:ring-plug-wa transition resize-none" placeholder="Tell us what's going on..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-plug-wa text-black font-semibold py-3 rounded-xl hover:bg-plug-wa/90 transition-colors text-sm flex items-center justify-center gap-2">
+                        Send Message <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        gsap.from(".main-header", { y: 30, opacity: 0, duration: 0.8, ease: "power3.out" });
+        gsap.from(".faq-section", { y: 20, opacity: 0, duration: 0.8, delay: 0.2, ease: "power3.out" });
+        gsap.from(".contact-form", { y: 20, opacity: 0, duration: 0.8, delay: 0.4, ease: "power3.out" });
+
+        function toggleFaq(button) {
+            const answer = button.nextElementSibling;
+            const icon = button.querySelector('[data-lucide="chevron-down"]');
+            const isOpen = answer.classList.contains('open');
+
+            document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+            document.querySelectorAll('.faq-item button i').forEach(i => i.style.transform = 'rotate(0deg)');
+
+            if (!isOpen) {
+                answer.classList.add('open');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+    </script>
+</body>
+</html>

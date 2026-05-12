@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ category_name }} Plugs - Spot a Plug</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] }, colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } } } }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; color: white; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .glass-card:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-4px); }
+        .premium-glow { border: 1px solid rgba(234, 179, 8, 0.3) !important; box-shadow: 0 0 20px rgba(234, 179, 8, 0.1); }
+        .premium-glow:hover { border-color: rgba(234, 179, 8, 0.5) !important; box-shadow: 0 0 30px rgba(234, 179, 8, 0.2); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-gradient { background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-plug-dark min-h-screen">
+
+    <!-- Top Nav -->
+    <nav class="sticky top-0 z-50 bg-black/80 backdrop-blur-lg border-b border-zinc-800/50 p-4 flex justify-between items-center">
+        <a href="/discover/" class="text-zinc-400 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <span class="font-display font-bold text-lg tracking-tight">{{ category_name }} Plugs</span>
+        <div class="w-5"></div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 pt-8 pb-12">
+
+        <!-- PREMIUM CUSTOM NICHES SECTION -->
+        {% if niches.exists %}
+        <section class="mb-12">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-display font-bold text-xl tracking-tight flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-yellow-400"></i> Curated Niches
+                </h2>
+                <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">VIP ONLY</span>
+            </div>
+            
+            <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+                {% for niche in niches %}
+                <a href="/vendor/{{ niche.vendor.id }}/" class="flex-shrink-0 w-36 h-36 rounded-2xl overflow-hidden relative group cursor-pointer border border-yellow-500/20 hover:border-yellow-500/40 transition-all">
+                    {% if niche.image %}
+                        <img src="{{ niche.image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ niche.name }}">
+                    {% else %}
+                        <div class="w-full h-full bg-zinc-800 flex items-center justify-center"><i data-lucide="tag" class="w-8 h-8 text-zinc-600"></i></div>
+                    {% endif %}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-2 left-2 right-2">
+                        <p class="font-semibold text-xs truncate">{{ niche.name }}</p>
+                        <p class="text-[9px] text-zinc-400 truncate">{{ niche.vendor.shop_name }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- VENDOR LISTING -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="font-display font-bold text-xl tracking-tight">All {{ category_name }} Vendors</h2>
+                    <p class="text-zinc-500 text-xs mt-1">{{ vendors|length }} plugs found</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for vendor in vendors %}
+                <a href="/vendor/{{ vendor.id }}/" class="vendor-card glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row group opacity-0 {% if vendor.is_premium %}premium-glow{% endif %}">
+                    <div class="md:w-40 h-48 md:h-auto overflow-hidden">
+                        <img src="{{ vendor.profile_image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ vendor.shop_name }}">
+                    </div>
+
+                    <div class="p-5 flex flex-col justify-between flex-grow">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold text-base group-hover:text-plug-wa transition-colors">{{ vendor.shop_name }}</h3>
+                                {% if vendor.is_premium %}
+                                    <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30 flex items-center gap-1">
+                                        <i data-lucide="star" class="w-2.5 h-2.5 fill-yellow-400 text-yellow-400"></i> PREMIUM
+                                    </span>
+                                {% else %}
+                                    <span class="text-[10px] font-bold bg-zinc-500/20 text-zinc-400 px-2 py-0.5 rounded-full border border-zinc-500/30">STANDARD</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="text-zinc-400 text-xs leading-relaxed mb-3">{{ vendor.description|truncatewords:15 }}</p>
+                            
+                            <div class="flex items-center gap-3 text-[10px] text-zinc-500">
+                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ vendor.location }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center justify-end">
+                            <span class="text-plug-wa text-xs font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                                View Plug <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                    <div class="col-span-2 text-center py-12">
+                        <p class="text-zinc-500 text-sm">No {{ category_name }} vendors listed yet.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.vendor-card').forEach((card, i) => {
+            gsap.to(card, {
+                y: 0, opacity: 1, duration: 0.8, delay: i % 2 * 0.15, ease: "power3.out",
+                scrollTrigger: { trigger: card, start: "top 90%", toggleActions: "play none none none" }
+            });
+        });
+    </script>
+</body>
+</html>
