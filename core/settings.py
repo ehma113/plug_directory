@@ -27,8 +27,7 @@ SECRET_KEY = 'django-insecure-$4r4x#l^8hr=0j=&67g@z1ilr$5uiv$=()r4j)9mnm^$*dzy7u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'spotaplug.pythonanywhere.com']
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'spotaplug.pythonanywhere.com', 'spotaplug.com', 'www.spotaplug.com']
 
 # Application definition
 
