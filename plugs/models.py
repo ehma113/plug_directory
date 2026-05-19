@@ -92,7 +92,14 @@ class VendorReport(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='reports')
     buyer_email = models.EmailField()
     reason = models.CharField(max_length=200)
+    screenshot = models.ImageField(upload_to='report_evidence/', blank=True, null=True, help_text="Optional: Upload a screenshot of the chat as proof")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('vendor', 'buyer_email') # One email can only report a vendor once
+
+    def __str__(self):
+        return f"Report on {self.vendor.shop_name} by {self.buyer_email}"
 
     class Meta:
         unique_together = ('vendor', 'buyer_email') # One email can only report a vendor once

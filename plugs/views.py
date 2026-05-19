@@ -120,11 +120,15 @@ def help_page(request):
                         messages.error(request, 'Vendors cannot report other vendors. This incident has been logged.')
                         return redirect('help_page')
                     
-                    # Check if this email already reported this vendor
+                # Check if this email already reported this vendor
+                    # CEO FIX: Added request.FILES to grab the screenshot
                     report, created = VendorReport.objects.get_or_create(
                         vendor=vendor,
                         buyer_email=email,
-                        defaults={'reason': message_body}
+                        defaults={
+                            'reason': message_body,
+                            'screenshot': request.FILES.get('report_screenshot') # Saves the evidence!
+                        }
                     )
                     
                     if created:

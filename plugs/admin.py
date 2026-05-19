@@ -41,8 +41,16 @@ class VendorAdmin(admin.ModelAdmin):
 class PaymentAuthAdmin(admin.ModelAdmin):
     list_display = ('vendor', 'is_active', 'paystack_auth_code')
     
+
 @admin.register(VendorReport)
 class VendorReportAdmin(admin.ModelAdmin):
     list_display = ('vendor', 'buyer_email', 'reason', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('vendor__shop_name', 'buyer_email', 'reason')
+    readonly_fields = ('screenshot_image',) # Lets you see the image nicely
+
+    def screenshot_image(self, obj):
+        if obj.screenshot:
+            return format_html('<img src="{}" width="400" />'.format(obj.screenshot.url))
+        return "No screenshot provided"
+    screenshot_image.short_description = 'Evidence Screenshot'
