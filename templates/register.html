@@ -80,15 +80,18 @@
                     <input type="text" name="location" value="{{ request.POST.location }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. Yaba, Lagos">
                 </div>
 
+                <!-- CEO FIX: WhatsApp Validation -->
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">WhatsApp Number (with country code) *</label>
-                    <input type="text" name="whatsapp_number" value="{{ request.POST.whatsapp_number }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. 2348012345678">
+                    <input type="text" id="whatsapp_number" name="whatsapp_number" value="{{ request.POST.whatsapp_number }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. 2348012345678">
+                    <p id="phone-error" class="text-red-400 text-[10px] mt-1 px-1 h-3"></p>
                 </div>
 
-                <!-- CEO FIX: Added Email for Paystack -->
+                <!-- CEO FIX: Added Email for Paystack & Verification -->
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Email Address *</label>
                     <input type="email" name="email" value="{{ request.POST.email }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. yourbusiness@email.com">
+                    <p class="text-zinc-600 text-[10px] mt-1 px-1">🔒 You'll need to verify this email to access all features.</p>
                 </div>
 
                 <div>
@@ -96,20 +99,23 @@
                     <input type="url" name="instagram_link" value="{{ request.POST.instagram_link }}" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="https://instagram.com/yourplug">
                 </div>
 
-                <!-- PASSWORD FIELDS -->
+                <!-- CEO FIX: PASSWORD FIELDS WITH REAL-TIME VALIDATION -->
                 <div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs text-zinc-400 block mb-1">Password *</label>
-                            <input type="password" name="password1" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="Min 8 characters">
+                            <input type="password" id="password1" name="password1" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="Min 8 characters">
+                            <div class="mt-2 h-1.5 w-full bg-zinc-700 rounded-full overflow-hidden">
+                                <div id="password-strength-bar" class="h-full rounded-full bg-red-500 transition-all" style="width: 0%"></div>
+                            </div>
+                            <p id="password-strength-text" class="text-zinc-500 text-[10px] mt-1 px-1"></p>
                         </div>
                         <div>
                             <label class="text-xs text-zinc-400 block mb-1">Confirm Password *</label>
-                            <input type="password" name="password2" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="Confirm password">
+                            <input type="password" id="password2" name="password2" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="Confirm password">
+                            <p id="password-match-text" class="text-[10px] mt-1 px-1 h-3"></p>
                         </div>
                     </div>
-                    <!-- CEO FIX: Password Helper Text -->
-                    <p class="text-zinc-600 text-[10px] mt-1.5 px-1">🔒 Must be 8+ characters. Avoid common passwords or entirely numbers.</p>
                 </div>
 
                 <div>
@@ -142,6 +148,71 @@
 
         </div>
     </main>
-    <script>lucide.createIcons();</script>
+
+    <!-- CEO FIX: Real-Time Validation Scripts -->
+    <script>
+        lucide.createIcons();
+
+        // --- REAL-TIME PASSWORD VALIDATION ---
+        const p1 = document.getElementById('password1');
+        const p2 = document.getElementById('password2');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+        const matchText = document.getElementById('password-match-text');
+
+        function validatePassword() {
+            const val = p1.value;
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (val.length >= 12) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            // Update Strength Bar
+            const width = (score / 5) * 100;
+            strengthBar.style.width = `${width}%`;
+            
+            if (score <= 1) { strengthBar.className = 'h-full rounded-full bg-red-500 transition-all'; strengthText.textContent = 'Weak'; }
+            else if (score <= 3) { strengthBar.className = 'h-full rounded-full bg-yellow-500 transition-all'; strengthText.textContent = 'Fair'; }
+            else { strengthBar.className = 'h-full rounded-full bg-plug-wa transition-all'; strengthText.textContent = 'Strong'; }
+
+            if (val.length === 0) { strengthBar.style.width = '0%'; strengthText.textContent = ''; }
+
+            // Check Match
+            if (p2.value.length > 0) {
+                if (p1.value === p2.value) {
+                    matchText.textContent = '✅ Passwords match';
+                    matchText.className = 'text-plug-wa text-[10px] mt-1 px-1';
+                } else {
+                    matchText.textContent = '❌ Passwords do not match';
+                    matchText.className = 'text-red-400 text-[10px] mt-1 px-1';
+                }
+            } else {
+                matchText.textContent = '';
+            }
+        }
+
+        if(p1 && p2) {
+            p1.addEventListener('input', validatePassword);
+            p2.addEventListener('input', validatePassword);
+        }
+
+        // --- REAL-TIME WHATSAPP VALIDATION ---
+        const whatsappInput = document.getElementById('whatsapp_number');
+        const phoneError = document.getElementById('phone-error');
+
+        whatsappInput.addEventListener('input', function() {
+            const val = this.value;
+            // Must be digits, can start with +
+            const isValid = /^\+?\d{10,15}$/.test(val);
+            
+            if (val.length > 0 && !isValid) {
+                phoneError.textContent = 'Format: 2348012345678 (10-15 digits only)';
+            } else {
+                phoneError.textContent = '';
+            }
+        });
+    </script>
 </body>
 </html>

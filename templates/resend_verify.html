@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - Spot a Plug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] },
+                    colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4">
+    
+    <div class="w-full max-w-md text-center">
+        <div class="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+            <i data-lucide="mail-check" class="w-10 h-10 text-blue-400"></i>
+        </div>
+
+        <h1 class="font-display font-bold text-3xl tracking-tight mb-2">Check Your Inbox</h1>
+        <p class="text-zinc-400 text-sm mb-6">We just sent a verification link to <span class="text-white font-semibold">{{ request.user.email }}</span>. You must verify your email to access your dashboard and receive buyer notifications.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-sm text-center px-4 py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="/resend-verification/" class="mb-6">
+            {% csrf_token %}
+            <p class="text-zinc-500 text-xs mb-3">Didn't get the email? Check your spam folder or click below.</p>
+            <button type="submit" class="inline-flex items-center gap-2 bg-white/10 border border-white/10 hover:bg-white/20 text-white font-semibold px-6 py-2.5 rounded-xl transition-all text-sm">
+                <i data-lucide="send" class="w-4 h-4"></i> Resend Verification Email
+            </button>
+        </form>
+
+        <a href="/logout/" class="text-zinc-600 text-xs hover:text-white transition-colors flex items-center justify-center gap-1">
+            <i data-lucide="log-out" class="w-3 h-3"></i> Log out
+        </a>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

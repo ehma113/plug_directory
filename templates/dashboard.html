@@ -23,6 +23,8 @@
         .locked-overlay { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
         .dash-faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
         .dash-faq-answer.open { max-height: 300px; padding-top: 0.75rem; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .alert-slide { animation: slideDown 0.5s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -40,6 +42,24 @@
     </nav>
 
     <main class="max-w-3xl mx-auto p-6 pb-24 space-y-6">
+
+        <!-- CEO FIX: EMAIL VERIFICATION WARNING (If not verified) -->
+        {% if not vendor.is_email_verified %}
+        <div class="alert-slide bg-blue-500/10 border border-blue-500/30 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 dash-alert">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="mail-warning" class="w-5 h-5 text-blue-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm text-blue-300">Verify Your Email Address</h3>
+                    <p class="text-xs text-blue-200/70 mt-1">You won't be able to upgrade to Premium or receive buyer notifications until you verify your email.</p>
+                </div>
+            </div>
+            <a href="{% url 'resend_verification' %}" class="flex-shrink-0 bg-blue-500/20 text-blue-300 font-semibold px-5 py-2 rounded-xl text-xs hover:bg-blue-500/30 transition-colors text-center w-full sm:w-auto">
+                Verify Now
+            </a>
+        </div>
+        {% endif %}
 
         <!-- DYNAMIC Plan Status -->
         <div class="glass-card rounded-2xl p-5 flex items-center justify-between dash-status">
@@ -276,11 +296,15 @@
 
     <script>
         lucide.createIcons();
-        gsap.from(".dash-status", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.2 });
-        gsap.from(".dash-upsell", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.4 });
-        gsap.from(".dash-niches", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.5 });
-        gsap.from(".dash-stat", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.6 });
-        gsap.from(".dash-menu", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 1.0 });
+        
+        // Animate the alert banner first if it exists
+        gsap.from(".dash-alert", { y: -20, opacity: 0, duration: 0.6, ease: "power3.out", delay: 0.1 });
+        
+        gsap.from(".dash-status", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.3 });
+        gsap.from(".dash-upsell", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.5 });
+        gsap.from(".dash-niches", { y: -20, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.6 });
+        gsap.from(".dash-stat", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.7 });
+        gsap.from(".dash-menu", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 1.1 });
 
         function toggleDashFaq(button) {
             const answer = button.nextElementSibling;

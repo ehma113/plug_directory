@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verified - Spot a Plug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] },
+                    colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; }
+        .mesh-bg { position: fixed; width: 100%; height: 100%; top: 0; left: 0; background: radial-gradient(circle at 50% 0%, rgba(37, 211, 102, 0.15) 0%, transparent 50%); z-index: -1; filter: blur(40px); }
+        @keyframes bounce-in { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .bounce-anim { animation: bounce-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="mesh-bg"></div>
+    
+    <div class="w-full max-w-md text-center bounce-anim">
+        <div class="w-24 h-24 rounded-full bg-plug-wa/20 flex items-center justify-center mx-auto mb-6 border border-plug-wa/30 shadow-[0_0_40px_rgba(37,211,102,0.2)]">
+            <i data-lucide="check-circle-2" class="w-14 h-14 text-plug-wa"></i>
+        </div>
+
+        <h1 class="font-display font-bold text-4xl tracking-tight mb-3">You're In! 🎉</h1>
+        <p class="text-zinc-400 text-base mb-8">Your email is verified. Your shop is officially live and ready for buyers.</p>
+
+        <a href="/dashboard/" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3.5 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] text-base">
+            Go to My Dashboard <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

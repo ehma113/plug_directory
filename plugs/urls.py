@@ -18,10 +18,22 @@ urlpatterns = [
     path('verify-payment/<str:reference>', views.verify_payment, name='verify_payment'),
     path('cancel-premium/', views.cancel_premium, name='cancel_premium'),
     
-    # CEO FIX: Niche Routes
+    # Niche Routes
     path('add-niche/', views.add_niche, name='add_niche'),
     path('delete-niche/<int:niche_id>/', views.delete_niche, name='delete_niche'),
     
-    # CEO FIX: Buyer Help Route
+    # Help Route
     path('help/', views.help_page, name='help_page'),
+
+    # CEO FIX: New 5-Star Routes
+    path('vips/', views.all_vips_page, name='all_vips'), 
+    path('verify-email/<str:token>/', views.verify_email, name='verify_email'), 
+    
+    # CEO FIX: CRITICAL - The Resend Verification Route (The Waiting Room)
+    path('resend-verification/', views.resend_verification, name='resend_verification'), 
+    
+    
+    # 1-Click Admin Toggles
+    path('admin/toggle-premium/<int:vendor_id>/', views.admin_toggle_premium, name='admin_toggle_premium'), 
+    path('admin/toggle-active/<int:vendor_id>/', views.admin_toggle_active, name='admin_toggle_active'), # NEW!
 ]

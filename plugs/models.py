@@ -1,18 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+import re
 
-# CEO FIX: All 10 Categories matching the Discover UI
 CATEGORY_CHOICES = (
-    ('Fashion', 'Fashion'),
-    ('Food', 'Food'),
-    ('Beauty', 'Beauty'),
-    ('Hair & Wigs', 'Hair & Wigs'),
-    ('Real Estate', 'Real Estate'),
-    ('Automobiles', 'Automobiles'),
-    ('Tech', 'Tech'),
-    ('Home & Decor', 'Home & Decor'),
-    ('Events & Printing', 'Events & Printing'),
-    ('Health & Fitness', 'Health & Fitness'),
+    ('Fashion', 'Fashion'), ('Food', 'Food'), ('Beauty', 'Beauty'),
+    ('Hair & Wigs', 'Hair & Wigs'), ('Real Estate', 'Real Estate'),
+    ('Automobiles', 'Automobiles'), ('Tech', 'Tech'), ('Home & Decor', 'Home & Decor'),
+    ('Events & Printing', 'Events & Printing'), ('Health & Fitness', 'Health & Fitness'),
 )
 
 class Vendor(models.Model):
@@ -30,25 +24,44 @@ class Vendor(models.Model):
     profile_image = models.ImageField(upload_to='profile_photos/')
     cover_image = models.ImageField(upload_to='cover_photos/')
     
-    # Premium & Trial Features
+    # Premium & Trial
     is_premium = models.BooleanField(default=False)
     has_used_trial = models.BooleanField(default=False)
     trial_start_date = models.DateTimeField(blank=True, null=True)
     premium_expiry_date = models.DateTimeField(blank=True, null=True)
     
-    # Helper properties
+    # CEO FIX: Email Verification
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token = models.CharField(max_length=100, blank=True, null=True)
+
+    # CEO FIX: Trust & Safety Fields (Merged into the main class)
+    is_active = models.BooleanField(default=True) # Allows you to shadow-ban/ban them
+    report_count = models.IntegerField(default=0) # Tracks how many times they've been reported
+
+    # CEO FIX: Strong Phone Number Validation
+    def clean_whatsapp_number(self):
+        # Remove all spaces and dashes
+        phone = re.sub(r'[\s\-]', '', self.whatsapp_number)
+        # Must be digits, optionally starting with +
+        if not re.match(r'^\+?\d{10,15}$', phone):
+            raise ValueError("WhatsApp number must be 10-15 digits (e.g., 2348012345678). No letters allowed.")
+        return phone
+
+    def save(self, *args, **kwargs):
+        self.whatsapp_number = self.clean_whatsapp_number()
+        super().save(*args, **kwargs)
+
     @property
     def photo_count(self):
         return self.gallery.count()
 
     @property
     def can_upload(self):
-        if self.is_premium:
-            return True
-        return self.photo_count < 10
+        return True if self.is_premium else self.photo_count < 10
 
     def __str__(self):
-        return f"{self.shop_name} - {'PREMIUM' if self.is_premium else 'STANDARD'}"
+        status = "BANNED" if not self.is_active else ('PREMIUM' if self.is_premium else 'STANDARD')
+        return f"{self.shop_name} - {status}"
 
 class VendorGallery(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='gallery')
@@ -73,3 +86,16 @@ class VendorNiche(models.Model):
     
     def __str__(self):
         return f"{self.vendor.shop_name} - {self.name}"
+
+# CEO FIX: Model to track who reported who (prevents one buyer from reporting 10 times)
+class VendorReport(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='reports')
+    buyer_email = models.EmailField()
+    reason = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('vendor', 'buyer_email') # One email can only report a vendor once
+
+    def __str__(self):
+        return f"Report on {self.vendor.shop_name} by {self.buyer_email}"
