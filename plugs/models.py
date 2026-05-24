@@ -34,14 +34,17 @@ class Vendor(models.Model):
     is_email_verified = models.BooleanField(default=False)
     email_verification_token = models.CharField(max_length=100, blank=True, null=True)
 
-    # CEO FIX: Trust & Safety Fields (Merged into the main class)
-    is_active = models.BooleanField(default=True) # Allows you to shadow-ban/ban them
-    report_count = models.IntegerField(default=0) # Tracks how many times they've been reported
+    # CEO FIX: Trust & Safety Fields
+    is_active = models.BooleanField(default=True) 
+    report_count = models.IntegerField(default=0) 
 
-    # CEO FIX: Strong Phone Number Validation
+    # CEO FIX: Strong Phone Number Validation & Auto +234
     def clean_whatsapp_number(self):
-        # Remove all spaces and dashes
         phone = re.sub(r'[\s\-]', '', self.whatsapp_number)
+        # If they didn't add the country code, auto-add 234
+        if not phone.startswith('+') and not phone.startswith('234'):
+            phone = '234' + phone
+            
         # Must be digits, optionally starting with +
         if not re.match(r'^\+?\d{10,15}$', phone):
             raise ValueError("WhatsApp number must be 10-15 digits (e.g., 2348012345678). No letters allowed.")
@@ -58,6 +61,24 @@ class Vendor(models.Model):
     @property
     def can_upload(self):
         return True if self.is_premium else self.photo_count < 10
+
+    # CEO FIX: 5-Star Rating Properties (MUST be inside Vendor class!)
+    @property
+    def average_rating(self):
+        baseline = 3 if self.is_premium else 0
+        reviews = self.reviews.all()
+        if not reviews.exists():
+            return baseline
+        avg = sum(review.rating for review in reviews) / reviews.count()
+        return max(round(avg, 1), baseline)
+
+    @property
+    def review_count(self):
+        return self.reviews.count()
+
+    @property
+    def star_percentage(self):
+        return (self.average_rating / 5) * 100
 
     def __str__(self):
         status = "BANNED" if not self.is_active else ('PREMIUM' if self.is_premium else 'STANDARD')
@@ -87,7 +108,7 @@ class VendorNiche(models.Model):
     def __str__(self):
         return f"{self.vendor.shop_name} - {self.name}"
 
-# CEO FIX: Model to track who reported who (prevents one buyer from reporting 10 times)
+# CEO FIX: Report Model (Fixed duplicate Meta)
 class VendorReport(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='reports')
     buyer_email = models.EmailField()
@@ -96,13 +117,21 @@ class VendorReport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('vendor', 'buyer_email') # One email can only report a vendor once
+        unique_together = ('vendor', 'buyer_email') 
 
     def __str__(self):
         return f"Report on {self.vendor.shop_name} by {self.buyer_email}"
+
+# CEO FIX: 5-Star Review Model
+class Review(models.Model):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='reviews')
+    buyer_name = models.CharField(max_length=50, help_text="e.g. Jane D.")
+    rating = models.IntegerField(choices=[(1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')])
+    comment = models.TextField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('vendor', 'buyer_email') # One email can only report a vendor once
+        ordering = ['-created_at'] 
 
     def __str__(self):
-        return f"Report on {self.vendor.shop_name} by {self.buyer_email}"
+        return f"{self.rating} star review for {self.vendor.shop_name}"

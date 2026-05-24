@@ -6,18 +6,16 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.urls import reverse # CEO FIX: Needed for verification redirects
+from django.urls import reverse 
 import requests
-import uuid # For email verification tokens
-import random # For VIP shuffle
+import uuid 
+import random 
 
-# CEO FIX: Import the Form that FORCES password validation!
 from django.contrib.auth.forms import UserCreationForm 
-# CEO FIX: Import HTML email renderer
 from django.template.loader import render_to_string
 
-# CEO FIX: Added VendorReport to imports!
-from .models import Vendor, VendorGallery, VendorNiche, PaymentAuth, VendorReport
+# CEO FIX: Added Review to imports!
+from .models import Vendor, VendorGallery, VendorNiche, PaymentAuth, VendorReport, Review
 from datetime import timedelta
 from django.utils import timezone
 
@@ -26,12 +24,10 @@ from django.utils import timezone
 # ==========================================
 
 def home_page(request):
-    # CEO FIX: Only show ACTIVE, Premium vendors
     all_vips = list(Vendor.objects.filter(is_premium=True, is_active=True))
     random.shuffle(all_vips)
     vip_vendors = all_vips[:10]
     
-    # Check if there are more VIPs than 10 (for the "See All" button)
     has_more_vips = len(all_vips) > 10
 
     fashion_count = Vendor.objects.filter(category__iexact='Fashion', is_active=True).count()
@@ -50,9 +46,7 @@ def home_page(request):
     
     return render(request, 'index.html', context)
 
-# CEO FIX: New View for "See All VIPs"
 def all_vips_page(request):
-    # CEO FIX: Only show ACTIVE, Premium vendors
     vip_vendors = Vendor.objects.filter(is_premium=True, is_active=True).order_by('shop_name')
     return render(request, 'all_vips.html', {'vendors': vip_vendors})
 
@@ -61,7 +55,6 @@ def smart_search(request):
     if len(query) < 2:
         return JsonResponse([], safe=False)
 
-    # CEO FIX: Filter out banned vendors from search results
     results = (Vendor.objects.filter(shop_name__icontains=query) | Vendor.objects.filter(category__icontains=query) | Vendor.objects.filter(location__icontains=query)).filter(is_active=True)
     results = results.order_by('-is_premium', 'shop_name')[:5]
 
@@ -73,7 +66,8 @@ def smart_search(request):
 
         data.append({
             'id': vendor.id, 'name': vendor.shop_name, 'category': vendor.category,
-            'location': vendor.location, 'image': image_url, 'is_premium': vendor.is_premium
+            'location': vendor.location, 'image': image_url, 'is_premium': vendor.is_premium,
+            'average_rating': vendor.average_rating, # CEO FIX: Add rating to search!
         })
     return JsonResponse(data, safe=False)
 
@@ -83,12 +77,10 @@ def vendor_profile(request, vendor_id):
     return render(request, 'vendor_profile.html', context)
 
 def discover_page(request):
-    # CEO FIX: Only show niches for ACTIVE vendors
     niches = VendorNiche.objects.filter(vendor__is_premium=True, vendor__is_active=True)
     return render(request, 'discover.html', {'niches': niches})
 
 def category_page(request, category_name):
-    # CEO FIX: Only show ACTIVE vendors in categories
     vendors = Vendor.objects.filter(category__iexact=category_name, is_active=True).order_by('-is_premium', 'shop_name')
     niches = VendorNiche.objects.filter(vendor__category__iexact=category_name, vendor__is_premium=True, vendor__is_active=True)
     context = {'category_name': category_name, 'vendors': vendors, 'niches': niches}
@@ -101,50 +93,41 @@ def help_page(request):
         issue_type = request.POST.get('issue_type')
         message_body = request.POST.get('message')
         
-        # CEO FIX: Anti-Sabotage Report Engine
         if issue_type == 'Report a Vendor':
             vendor_name = request.POST.get('reported_vendor', '').strip()
-            chat_number = request.POST.get('chat_number', '').strip() # The receipt check
+            chat_number = request.POST.get('chat_number', '').strip()
             
-            # Defense 1: Did they prove they actually chatted with the vendor?
             if not chat_number:
-                messages.error(request, 'To report a vendor, you must provide the WhatsApp number you used to chat with them. This prevents fake reports.')
+                messages.error(request, 'To report a vendor, you must provide the WhatsApp number you used to chat with them.')
                 return redirect('help_page')
                 
             if vendor_name:
                 vendor = Vendor.objects.filter(shop_name__icontains=vendor_name).first()
                 
                 if vendor:
-                    # Defense 2: Is the person reporting a competitor? (Vendors can't ban vendors!)
                     if User.objects.filter(email__iexact=email, vendor__isnull=False).exists():
-                        messages.error(request, 'Vendors cannot report other vendors. This incident has been logged.')
+                        messages.error(request, 'Vendors cannot report other vendors.')
                         return redirect('help_page')
                     
-                # Check if this email already reported this vendor
-                    # CEO FIX: Added request.FILES to grab the screenshot
                     report, created = VendorReport.objects.get_or_create(
                         vendor=vendor,
                         buyer_email=email,
                         defaults={
                             'reason': message_body,
-                            'screenshot': request.FILES.get('report_screenshot') # Saves the evidence!
+                            'screenshot': request.FILES.get('report_screenshot')
                         }
                     )
                     
                     if created:
                         vendor.report_count += 1
-                        
-                        # THE 3-STRIKE RULE: Auto-ban at 3 reports
                         if vendor.report_count >= 3:
                             vendor.is_active = False
                             vendor.is_premium = False
-                            
-                            # Alert the CEO
                             try:
                                 from django.core.mail import send_mail
                                 send_mail(
                                     f'🚨 AUTO-BANNED: {vendor.shop_name}',
-                                    f'Vendor {vendor.shop_name} was automatically banned after receiving {vendor.report_count} reports.\n\nLatest reason: {message_body}\n\nChat number provided: {chat_number}\n\nLOG IN TO ADMIN TO REVIEW. IF THIS IS A MISTAKE, CLICK "IS ACTIVE" TO REINSTATE.',
+                                    f'Vendor {vendor.shop_name} was automatically banned after receiving {vendor.report_count} reports.',
                                     settings.DEFAULT_FROM_EMAIL,
                                     ['ehma1023@gmail.com'],
                                     fail_silently=False,
@@ -153,17 +136,15 @@ def help_page(request):
                                 pass
                         
                         vendor.save()
-                        messages.success(request, f'Thank you! Your report against {vendor.shop_name} has been recorded. We take safety seriously.')
+                        messages.success(request, f'Thank you! Your report against {vendor.shop_name} has been recorded.')
                     else:
-                        messages.warning(request, 'You have already reported this vendor. We are currently reviewing your previous report.')
+                        messages.warning(request, 'You have already reported this vendor.')
                 else:
-                    messages.error(request, f'Could not find a vendor named "{vendor_name}". Please check the spelling.')
+                    messages.error(request, f'Could not find a vendor named "{vendor_name}".')
             else:
-                messages.error(request, 'Please provide the name of the vendor you are reporting.')
-            
+                messages.error(request, 'Please provide the name of the vendor.')
             return redirect('help_page')
         
-        # STANDARD SUPPORT TICKET (Non-Reports)
         full_message = f"New Support Ticket:\n\nFrom: {name} ({email})\nType: {issue_type}\n\nMessage:\n{message_body}"
         try:
             from django.core.mail import send_mail
@@ -196,6 +177,10 @@ def vendor_register(request):
         profile_image = request.FILES.get('profile_image')
         cover_image = request.FILES.get('cover_image')
 
+        # CEO FIX: Auto-add 234 if they didn't type it
+        if whatsapp_number and not whatsapp_number.startswith('+') and not whatsapp_number.startswith('234'):
+            whatsapp_number = '234' + whatsapp_number
+
         if password1 != password2:
             error = "Passwords do not match."
         elif User.objects.filter(username=whatsapp_number).exists():
@@ -204,7 +189,6 @@ def vendor_register(request):
             error = "A vendor with this Email already exists."
 
         if not error:
-            # CEO FIX: Use UserCreationForm to FORCE Django's password validators!
             form = UserCreationForm({
                 'username': whatsapp_number,
                 'email': email,
@@ -214,7 +198,7 @@ def vendor_register(request):
             
             if form.is_valid():
                 try:
-                    user = form.save() # Safely creates user with validated & hashed password
+                    user = form.save()
                     
                     token = str(uuid.uuid4())
                     
@@ -225,95 +209,79 @@ def vendor_register(request):
                         is_email_verified=False, email_verification_token=token
                     )
 
-                    # CEO FIX: Send 5-Star HTML Verification Email
                     verify_url = f"{request.scheme}://{request.get_host()}/verify-email/{token}/"
                     try:
                         from django.core.mail import send_mail
-                        
-                        # Load the beautiful HTML template
                         html_message = render_to_string('emails/verify_email.html', {
                             'shop_name': shop_name,
                             'verify_url': verify_url
                         })
-                        
                         send_mail(
-                            'Spot a Plug - Verify Your Email',  # Subject
-                            f'Hi {shop_name}! Please verify your account: {verify_url}', # Plain text fallback
-                            settings.DEFAULT_FROM_EMAIL,         # From
-                            [email],                             # To
+                            'Spot a Plug - Verify Your Email',
+                            f'Hi {shop_name}! Please verify your account: {verify_url}',
+                            settings.DEFAULT_FROM_EMAIL,
+                            [email],
                             fail_silently=False,
-                            html_message=html_message,           # THE BEAUTIFUL HTML VERSION
+                            html_message=html_message,
                         )
                     except Exception:
                         pass 
 
                     login(request, user)
-                    # CEO FIX: Send them to the verification waiting room, NOT the dashboard!
                     return redirect('resend_verification')
                 
                 except Exception as e:
-                    # Catch any model validation errors (like bad WhatsApp number)
                     error = str(e)
             else:
-                # If the form fails (weak password), grab Django's built-in error messages nicely
                 for field, errors in form.errors.items():
                     for e in errors:
-                        error = e  # Shows "This password is too common" etc.
+                        error = e
                         break
                 if not error:
                     error = "Please ensure all fields are filled correctly."
 
     return render(request, 'register.html', {'error': error})
 
-# CEO FIX: Email Verification View (5-Star Celebration)
 def verify_email(request, token):
     vendor = get_object_or_404(Vendor, email_verification_token=token)
     vendor.is_email_verified = True
-    vendor.email_verification_token = None # Burns the token so it can't be reused
+    vendor.email_verification_token = None
     vendor.save()
     
-    # Log them in automatically if they aren't already (smooth UX)
     if not request.user.is_authenticated:
         login(request, vendor.user)
         
-    # Show the beautiful success page instead of a boring redirect!
     return render(request, 'verify_success.html', {'vendor': vendor})
 
-# CEO FIX: Resend Verification Email View
 @login_required(login_url='/login/')
 def resend_verification(request):
     vendor = get_object_or_404(Vendor, user=request.user)
     
-    # If they are already verified, kick them out to the dashboard
     if vendor.is_email_verified:
         return redirect('vendor_dashboard')
 
     if request.method == 'POST':
-        # Generate a new token and send the email again
         vendor.email_verification_token = str(uuid.uuid4())
         vendor.save()
 
         verify_url = f"{request.scheme}://{request.get_host()}/verify-email/{vendor.email_verification_token}/"
         try:
             from django.core.mail import send_mail
-            
-            # Load the beautiful HTML template
             html_message = render_to_string('emails/verify_email.html', {
                 'shop_name': vendor.shop_name,
                 'verify_url': verify_url
             })
-            
             send_mail(
                 'Spot a Plug - Verify Your Email',
                 f'Hi {vendor.shop_name}! Please verify your account: {verify_url}',
                 settings.DEFAULT_FROM_EMAIL,
                 [request.user.email],
                 fail_silently=False,
-                html_message=html_message, # THE BEAUTIFUL HTML VERSION
+                html_message=html_message,
             )
-            messages.success(request, 'A new verification email has been sent! Please check your inbox.')
+            messages.success(request, 'A new verification email has been sent!')
         except Exception:
-            messages.error(request, 'Could not send email. Please try again later or contact support.')
+            messages.error(request, 'Could not send email. Please try again later.')
             
         return redirect(reverse('resend_verification'))
 
@@ -330,16 +298,14 @@ def vendor_login(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # CEO FIX: Check if they are banned before logging them in!
             try:
                 vendor = user.vendor
                 if not vendor.is_active:
-                    error = "Your account has been suspended due to policy violations. Contact support if you believe this is a mistake."
+                    error = "Your account has been suspended due to policy violations. Contact support."
                 else:
                     login(request, user)
                     return redirect('vendor_dashboard')
             except Exception:
-                # If they are a superuser with no vendor profile, let them in
                 login(request, user)
                 return redirect('vendor_dashboard')
         else:
@@ -413,6 +379,10 @@ def edit_shop(request):
         instagram_link = request.POST.get('instagram_link', ''); description = request.POST.get('description')
         new_profile_image = request.FILES.get('profile_image'); new_cover_image = request.FILES.get('cover_image')
         
+        # CEO FIX: Auto-add 234 if they didn't type it on edit
+        if whatsapp_number and not whatsapp_number.startswith('+') and not whatsapp_number.startswith('234'):
+            whatsapp_number = '234' + whatsapp_number
+
         if whatsapp_number != vendor.whatsapp_number and User.objects.filter(username=whatsapp_number).exists():
             error = "That WhatsApp number is already taken."
         else:
@@ -466,7 +436,6 @@ def cancel_premium(request):
 # 4. GOD MODE (ADMIN TOGGLES)
 # ==========================================
 
-# CEO FIX: Admin Toggle View for 1-Click Premium
 def admin_toggle_premium(request, vendor_id):
     if not request.user.is_staff:
         return redirect('/admin/login/?next=/admin/toggle-premium/{}/'.format(vendor_id))
@@ -475,15 +444,39 @@ def admin_toggle_premium(request, vendor_id):
     vendor.save()
     return redirect('/admin/plugs/vendor/')
 
-# CEO FIX: Admin Toggle View for 1-Click Ban/Reinstate
 def admin_toggle_active(request, vendor_id):
     if not request.user.is_staff:
         return redirect('/admin/login/?next=/admin/toggle-active/{}/'.format(vendor_id))
     
     vendor = get_object_or_404(Vendor, id=vendor_id)
     vendor.is_active = not vendor.is_active
-    # If we are reinstating them, reset their report count to 0 so they don't instantly get auto-banned again
     if vendor.is_active:
         vendor.report_count = 0
     vendor.save()
     return redirect('/admin/plugs/vendor/')
+
+# ==========================================
+# 5. 5-STAR REVIEW ENGINE
+# ==========================================
+
+# CEO FIX: Submit Review View
+def submit_review(request, vendor_id):
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    
+    if request.method == 'POST':
+        buyer_name = request.POST.get('buyer_name')
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+        
+        if buyer_name and rating and comment:
+            Review.objects.create(
+                vendor=vendor,
+                buyer_name=buyer_name,
+                rating=int(rating),
+                comment=comment
+            )
+            messages.success(request, 'Thanks for your review!')
+        else:
+            messages.error(request, 'Please fill out all review fields.')
+            
+    return redirect('vendor_profile', vendor_id=vendor.id)

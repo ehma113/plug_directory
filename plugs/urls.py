@@ -36,4 +36,5 @@ urlpatterns = [
     # 1-Click Admin Toggles
     path('admin/toggle-premium/<int:vendor_id>/', views.admin_toggle_premium, name='admin_toggle_premium'), 
     path('admin/toggle-active/<int:vendor_id>/', views.admin_toggle_active, name='admin_toggle_active'), # NEW!
+    path('vendor/<int:vendor_id>/review/', views.submit_review, name='submit_review'),
 ]

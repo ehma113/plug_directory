@@ -80,10 +80,13 @@
                     <input type="text" name="location" value="{{ request.POST.location }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. Yaba, Lagos">
                 </div>
 
-                <!-- CEO FIX: WhatsApp Validation -->
+                <!-- CEO FIX: WhatsApp Validation with +234 Prefix -->
                 <div>
-                    <label class="text-xs text-zinc-400 block mb-1">WhatsApp Number (with country code) *</label>
-                    <input type="text" id="whatsapp_number" name="whatsapp_number" value="{{ request.POST.whatsapp_number }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. 2348012345678">
+                    <label class="text-xs text-zinc-400 block mb-1">WhatsApp Number *</label>
+                    <div class="flex">
+                        <span class="inline-flex items-center px-4 bg-zinc-700 border border-r-0 border-zinc-600 rounded-l-xl text-sm text-zinc-400 font-semibold">+234</span>
+                        <input type="text" name="whatsapp_number" id="whatsapp_number" value="{{ request.POST.whatsapp_number }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-r-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="8012345678">
+                    </div>
                     <p id="phone-error" class="text-red-400 text-[10px] mt-1 px-1 h-3"></p>
                 </div>
 
@@ -153,13 +156,26 @@
     <script>
         lucide.createIcons();
 
-        // --- REAL-TIME PASSWORD VALIDATION ---
+        // --- VARIABLE DECLARATIONS (No duplicates!) ---
+        const form = document.querySelector('form');
+        const whatsappInput = document.getElementById('whatsapp_number');
+        const phoneError = document.getElementById('phone-error');
         const p1 = document.getElementById('password1');
         const p2 = document.getElementById('password2');
         const strengthBar = document.getElementById('password-strength-bar');
         const strengthText = document.getElementById('password-strength-text');
         const matchText = document.getElementById('password-match-text');
 
+        // --- 1. AUTO +234 ON SUBMIT ---
+        form.addEventListener('submit', function(e) {
+            let phone = whatsappInput.value.trim();
+            // If they didn't type +234, add it for them before sending to Django
+            if (!phone.startsWith('+') && !phone.startsWith('234')) {
+                whatsappInput.value = '234' + phone;
+            }
+        });
+
+        // --- 2. REAL-TIME PASSWORD VALIDATION ---
         function validatePassword() {
             const val = p1.value;
             let score = 0;
@@ -169,7 +185,6 @@
             if (/[0-9]/.test(val)) score++;
             if (/[^A-Za-z0-9]/.test(val)) score++;
 
-            // Update Strength Bar
             const width = (score / 5) * 100;
             strengthBar.style.width = `${width}%`;
             
@@ -179,7 +194,6 @@
 
             if (val.length === 0) { strengthBar.style.width = '0%'; strengthText.textContent = ''; }
 
-            // Check Match
             if (p2.value.length > 0) {
                 if (p1.value === p2.value) {
                     matchText.textContent = '✅ Passwords match';
@@ -198,17 +212,14 @@
             p2.addEventListener('input', validatePassword);
         }
 
-        // --- REAL-TIME WHATSAPP VALIDATION ---
-        const whatsappInput = document.getElementById('whatsapp_number');
-        const phoneError = document.getElementById('phone-error');
-
+        // --- 3. REAL-TIME WHATSAPP VALIDATION ---
         whatsappInput.addEventListener('input', function() {
-            const val = this.value;
-            // Must be digits, can start with +
-            const isValid = /^\+?\d{10,15}$/.test(val);
+            const val = this.value.trim();
+            // Because we have +234 locked visually, they just type 10 digits (e.g. 8012345678)
+            const isValid = /^\d{10}$/.test(val);
             
             if (val.length > 0 && !isValid) {
-                phoneError.textContent = 'Format: 2348012345678 (10-15 digits only)';
+                phoneError.textContent = 'Enter 10 digits (e.g. 8012345678). No letters allowed.';
             } else {
                 phoneError.textContent = '';
             }
