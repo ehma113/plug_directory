@@ -28,7 +28,8 @@
     <div class="mesh-bg"></div>
 
     <nav class="p-4 flex items-center gap-2">
-        <a href="/" class="flex items-center gap-2 text-zinc-400 hover:text-white transition">
+        <!-- CEO FIX: Dynamic URL -->
+        <a href="{% url 'home' %}" class="flex items-center gap-2 text-zinc-400 hover:text-white transition">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
             <span class="font-display font-bold">Spot a Plug</span>
         </a>
@@ -42,7 +43,8 @@
                 <p class="text-zinc-400 text-sm mt-2">Get discovered by thousands. Start for free, upgrade later.</p>
             </div>
 
-            <form action="/register/" method="POST" enctype="multipart/form-data" class="space-y-5 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+            <!-- CEO FIX: Dynamic URL -->
+            <form action="{% url 'register' %}" method="POST" enctype="multipart/form-data" class="space-y-5 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                 {% csrf_token %}
 
                 <!-- DJANGO ERROR MESSAGE BLOCK -->
@@ -55,29 +57,30 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs text-zinc-400 block mb-1">Business Name *</label>
-                        <input type="text" name="shop_name" value="{{ request.POST.shop_name }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. Lagos Thrift Queen">
+                        <!-- CEO FIX: Safe XSS escaping with old_data -->
+                        <input type="text" name="shop_name" value="{% if old_data %}{{ old_data.shop_name|escape }}{% endif %}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. Lagos Thrift Queen">
                     </div>
                     <div>
                         <label class="text-xs text-zinc-400 block mb-1">Category *</label>
                         <select name="category" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition appearance-none">
                             <option value="" disabled selected>Select</option>
-                            <option value="Fashion" {% if request.POST.category == 'Fashion' %}selected{% endif %}>Fashion</option>
-                            <option value="Food" {% if request.POST.category == 'Food' %}selected{% endif %}>Food</option>
-                            <option value="Beauty" {% if request.POST.category == 'Beauty' %}selected{% endif %}>Beauty</option>
-                            <option value="Hair & Wigs" {% if request.POST.category == 'Hair & Wigs' %}selected{% endif %}>Hair & Wigs</option>
-                            <option value="Real Estate" {% if request.POST.category == 'Real Estate' %}selected{% endif %}>Real Estate</option>
-                            <option value="Automobiles" {% if request.POST.category == 'Automobiles' %}selected{% endif %}>Automobiles</option>
-                            <option value="Tech" {% if request.POST.category == 'Tech' %}selected{% endif %}>Tech</option>
-                            <option value="Home & Decor" {% if request.POST.category == 'Home & Decor' %}selected{% endif %}>Home & Decor</option>
-                            <option value="Events & Printing" {% if request.POST.category == 'Events & Printing' %}selected{% endif %}>Events & Printing</option>
-                            <option value="Health & Fitness" {% if request.POST.category == 'Health & Fitness' %}selected{% endif %}>Health & Fitness</option>
+                            <option value="Fashion" {% if old_data and old_data.category == 'Fashion' %}selected{% endif %}>Fashion</option>
+                            <option value="Food" {% if old_data and old_data.category == 'Food' %}selected{% endif %}>Food</option>
+                            <option value="Beauty" {% if old_data and old_data.category == 'Beauty' %}selected{% endif %}>Beauty</option>
+                            <option value="Hair & Wigs" {% if old_data and old_data.category == 'Hair & Wigs' %}selected{% endif %}>Hair & Wigs</option>
+                            <option value="Real Estate" {% if old_data and old_data.category == 'Real Estate' %}selected{% endif %}>Real Estate</option>
+                            <option value="Automobiles" {% if old_data and old_data.category == 'Automobiles' %}selected{% endif %}>Automobiles</option>
+                            <option value="Tech" {% if old_data and old_data.category == 'Tech' %}selected{% endif %}>Tech</option>
+                            <option value="Home & Decor" {% if old_data and old_data.category == 'Home & Decor' %}selected{% endif %}>Home & Decor</option>
+                            <option value="Events & Printing" {% if old_data and old_data.category == 'Events & Printing' %}selected{% endif %}>Events & Printing</option>
+                            <option value="Health & Fitness" {% if old_data and old_data.category == 'Health & Fitness' %}selected{% endif %}>Health & Fitness</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Location *</label>
-                    <input type="text" name="location" value="{{ request.POST.location }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. Yaba, Lagos">
+                    <input type="text" name="location" value="{% if old_data %}{{ old_data.location|escape }}{% endif %}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. Yaba, Lagos">
                 </div>
 
                 <!-- CEO FIX: WhatsApp Validation with +234 Prefix -->
@@ -85,7 +88,8 @@
                     <label class="text-xs text-zinc-400 block mb-1">WhatsApp Number *</label>
                     <div class="flex">
                         <span class="inline-flex items-center px-4 bg-zinc-700 border border-r-0 border-zinc-600 rounded-l-xl text-sm text-zinc-400 font-semibold">+234</span>
-                        <input type="text" name="whatsapp_number" id="whatsapp_number" value="{{ request.POST.whatsapp_number }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-r-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="8012345678">
+                        <!-- Strip the 234 prefix if the server added it, so it doesn't double-stack in the UI -->
+                        <input type="text" name="whatsapp_number" id="whatsapp_number" value="{% if old_data %}{{ old_data.whatsapp_number|cut:'234' }}{% endif %}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-r-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="8012345678">
                     </div>
                     <p id="phone-error" class="text-red-400 text-[10px] mt-1 px-1 h-3"></p>
                 </div>
@@ -93,13 +97,13 @@
                 <!-- CEO FIX: Added Email for Paystack & Verification -->
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Email Address *</label>
-                    <input type="email" name="email" value="{{ request.POST.email }}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. yourbusiness@email.com">
+                    <input type="email" name="email" value="{% if old_data %}{{ old_data.email|escape }}{% endif %}" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="e.g. yourbusiness@email.com">
                     <p class="text-zinc-600 text-[10px] mt-1 px-1">🔒 You'll need to verify this email to access all features.</p>
                 </div>
 
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Instagram Link (Optional)</label>
-                    <input type="url" name="instagram_link" value="{{ request.POST.instagram_link }}" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="https://instagram.com/yourplug">
+                    <input type="url" name="instagram_link" value="{% if old_data %}{{ old_data.instagram_link }}{% endif %}" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition" placeholder="https://instagram.com/yourplug">
                 </div>
 
                 <!-- CEO FIX: PASSWORD FIELDS WITH REAL-TIME VALIDATION -->
@@ -123,7 +127,7 @@
 
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Short Description *</label>
-                    <textarea name="description" required rows="3" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition resize-none" placeholder="What do you sell? Why should they buy from you?">{{ request.POST.description }}</textarea>
+                    <textarea name="description" required rows="3" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-plug-wa transition resize-none" placeholder="What do you sell? Why should they buy from you?">{% if old_data %}{{ old_data.description|escape }}{% endif %}</textarea>
                 </div>
 
                 <!-- MANDATORY PROFILE & COVER PHOTOS -->
@@ -145,8 +149,9 @@
 
             </form>
 
+            <!-- CEO FIX: Dynamic URL -->
             <p class="text-center text-zinc-600 text-xs mt-6">
-                Already have an account? <a href="/login/" class="text-plug-wa hover:underline">Log in</a>
+                Already have an account? <a href="{% url 'login' %}" class="text-plug-wa hover:underline">Log in</a>
             </p>
 
         </div>

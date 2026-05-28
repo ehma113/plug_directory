@@ -28,9 +28,9 @@
 </head>
 <body class="min-h-screen">
 
-    <!-- Nav -->
+    <!-- Nav (Dynamic URL) -->
     <nav class="p-4 flex justify-between items-center border-b border-zinc-800/50">
-        <a href="/" class="text-zinc-400 hover:text-white transition flex items-center gap-2">
+        <a href="{% url 'home' %}" class="text-zinc-400 hover:text-white transition flex items-center gap-2">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
             <span class="font-display font-bold text-lg">Spot a Plug</span>
         </a>
@@ -160,13 +160,15 @@
 
                 {% if messages %}
                     {% for message in messages %}
+                        <!-- CEO FIX: XSS Escaping on messages -->
                         <div class="mb-6 p-4 rounded-xl text-sm font-medium {% if message.tags == 'success' %}bg-green-500/10 text-green-400 border border-green-500/20{% else %}bg-red-500/10 text-red-400 border border-red-500/20{% endif %}">
-                            {{ message }}
+                            {{ message|escape }}
                         </div>
                     {% endfor %}
                 {% endif %}
 
-                <form method="POST" action="{% url 'help_page' %}" class="max-w-md mx-auto space-y-4 text-left">
+                <!-- CEO FIX: Dynamic URL -->
+                <form method="POST" action="{% url 'help_page' %}" class="max-w-md mx-auto space-y-4 text-left" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div>
                         <label class="text-xs text-zinc-300 mb-1 block font-medium">Your Name</label>
@@ -185,7 +187,7 @@
                         </select>
                     </div>
                     
-                                        <!-- CEO FIX: Anti-Sabotage Fields (Only visible when reporting) -->
+                    <!-- CEO FIX: Anti-Sabotage Fields -->
                     <div id="vendor_name_field" class="hidden space-y-4">
                         <div>
                             <label class="text-xs text-red-400 mb-1 block font-medium">Name of the Vendor you are reporting *</label>

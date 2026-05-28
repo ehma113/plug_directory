@@ -19,6 +19,10 @@ from django.urls import path, include
 from django.conf import settings # <-- ADD THIS
 from django.conf.urls.static import static # <-- ADD THIS
 
+# CEO FIX: Custom Beautiful Error Pages (No more ugly Django debug screens!)
+handler404 = 'plugs.views.custom_404'
+handler500 = 'plugs.views.custom_500'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('plugs.urls')),

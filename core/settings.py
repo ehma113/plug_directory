@@ -2,14 +2,17 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv # CEO FIX: Load environment variables securely
 
-load_dotenv() # Loads the .env file
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# CEO FIX: Explicitly tell load_dotenv where the .env file lives!
+# This prevents PythonAnywhere WSGI from failing to find your secrets.
+env_path = BASE_DIR / '.env'
+load_dotenv(dotenv_path=env_path) 
 
 # CEO FIX: Secret key now pulled from environment, NOT hardcoded!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 
-
+# CEO FIX: Set to 'False' in your PythonAnywhere .env file!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'spotaplug.pythonanywhere.com', 'spotaplug.com', 'www.spotaplug.com']
@@ -26,6 +29,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'plugs.middleware.VaultDoorMiddleware', # CEO FIX: The Vault Door (Admin IP Blocker & .env Protector)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,15 +88,30 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
 PAYSTACK_SECRET_KEY = os.getenv('PAYSTACK_SECRET_KEY')
 
-# CEO FIX: Email Config from .env
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465           
-EMAIL_USE_SSL = True       
-EMAIL_USE_TLS = False      
-EMAIL_HOST_USER = 'ehma1023@gmail.com'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') 
+# CEO FIX: ENTERPRISE EMAIL (RESEND) - ACTUALLY SENDS!
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv('RESEND_API_KEY'), # We will add this to .env
+}
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+# CEO FIX: Resend requires an email on your verified domain! Not @gmail.com!
+EMAIL_HOST_USER = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@spotaplug.com') 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# ==========================================
+# CEO FIX: SEARCH DDOS SHIELD (Caching)
+# ==========================================
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'spotaplug-cache',
+    }
+}
+
+# ==========================================
+# CEO FIX: ADMIN VAULT DOOR (IP Whitelist)
+# ==========================================
+# Add your home/office IP to your .env file so you can access /admin/ in production
+ALLOWED_ADMIN_IPS = os.getenv('ALLOWED_ADMIN_IPS', '127.0.0.1').split(',')
 
 # ==========================================
 # 5-STAR SECURITY SETTINGS (PRODUCTION READY)

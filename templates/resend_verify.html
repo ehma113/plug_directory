@@ -39,7 +39,8 @@
             {% endfor %}
         {% endif %}
 
-        <form method="POST" action="/resend-verification/" class="mb-6">
+        <!-- CEO FIX: Dynamic URL -->
+        <form method="POST" action="{% url 'resend_verification' %}" class="mb-6">
             {% csrf_token %}
             <p class="text-zinc-500 text-xs mb-3">Didn't get the email? Check your spam folder or click below.</p>
             <button type="submit" class="inline-flex items-center gap-2 bg-white/10 border border-white/10 hover:bg-white/20 text-white font-semibold px-6 py-2.5 rounded-xl transition-all text-sm">
@@ -47,7 +48,8 @@
             </button>
         </form>
 
-        <a href="/logout/" class="text-zinc-600 text-xs hover:text-white transition-colors flex items-center justify-center gap-1">
+        <!-- CEO FIX: Dynamic URL -->
+        <a href="{% url 'logout' %}" class="text-zinc-600 text-xs hover:text-white transition-colors flex items-center justify-center gap-1">
             <i data-lucide="log-out" class="w-3 h-3"></i> Log out
         </a>
     </div>

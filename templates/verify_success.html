@@ -35,7 +35,8 @@
         <h1 class="font-display font-bold text-4xl tracking-tight mb-3">You're In! 🎉</h1>
         <p class="text-zinc-400 text-base mb-8">Your email is verified. Your shop is officially live and ready for buyers.</p>
 
-        <a href="/dashboard/" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3.5 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] text-base">
+        <!-- CEO FIX: Dynamic URL -->
+        <a href="{% url 'vendor_dashboard' %}" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3.5 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] text-base">
             Go to My Dashboard <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </a>
     </div>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error - Spot a Plug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { 'display': ['Space Grotesk', 'sans-serif'], 'body': ['Inter', 'sans-serif'] }, colors: { 'plug': { 'dark': '#050505', 'wa': '#25D366', 'ig': '#E1306C' } } } } }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #050505; color: white; }
+        .mesh-bg { position: fixed; width: 100%; height: 100%; top: 0; left: 0; background: radial-gradient(circle at 50% 0%, rgba(225, 48, 108, 0.08) 0%, transparent 50%); z-index: -1; filter: blur(40px); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="mesh-bg"></div>
+    
+    <div class="text-center max-w-md">
+        <div class="w-20 h-20 rounded-full bg-plug-ig/10 flex items-center justify-center mx-auto mb-6 border border-plug-ig/20">
+            <i data-lucide="alert-triangle" class="w-10 h-10 text-plug-ig"></i>
+        </div>
+        
+        <h1 class="font-display font-bold text-8xl tracking-tighter text-gradient bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500 mb-4">500</h1>
+        <h2 class="font-display font-bold text-2xl tracking-tight mb-2">Our Servers are Sweating</h2>
+        <p class="text-zinc-400 text-sm mb-8 leading-relaxed">Something broke on our end. We've been notified and are fixing it right now. Please try again in a moment.</p>
+        
+        <a href="/" class="inline-flex items-center gap-2 bg-white text-black font-bold px-8 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm">
+            <i data-lucide="home" class="w-4 h-4"></i> Go Back Home
+        </a>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

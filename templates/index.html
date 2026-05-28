@@ -180,7 +180,7 @@
     <!-- Premium Sticky Nav -->
     <nav class="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
         <div class="max-w-5xl mx-auto glass-card rounded-2xl px-5 py-3 flex justify-between items-center">
-            <a href="/" class="flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'home' %}" class="flex items-center gap-2 flex-shrink-0">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-plug-ig to-plug-wa flex items-center justify-center">
                     <i data-lucide="zap" class="w-4 h-4 text-white"></i>
                 </div>
@@ -208,11 +208,11 @@
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
                 
-                <!-- Auth Links -->
-                <a href="/login/" class="text-zinc-400 hover:text-white transition-colors text-xs font-medium hidden sm:block">Log in</a>
+                <!-- Auth Links (Dynamic URLs) -->
+                <a href="{% url 'login' %}" class="text-zinc-400 hover:text-white transition-colors text-xs font-medium hidden sm:block">Log in</a>
                 
                 <!-- THE MAGIC BUTTON -->
-                <a href="/register/" class="bg-white/10 border border-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                <a href="{% url 'register' %}" class="bg-white/10 border border-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
                     <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> 
                     <span class="hidden sm:inline">List Your Plug</span>
                     <span class="sm:hidden">Sell</span>
@@ -257,13 +257,14 @@
         <section class="mb-12">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl tracking-tight">Categories</h2>
-                <a href="/discover/" class="text-zinc-500 text-sm hover:text-white transition-colors flex items-center gap-1">
+                <a href="{% url 'discover_page' %}" class="text-zinc-500 text-sm hover:text-white transition-colors flex items-center gap-1">
                     View all <i data-lucide="arrow-right" class="w-3 h-3"></i>
                 </a>
             </div>
             
             <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
-                <a href="/category/Fashion/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                <!-- CEO FIX: Dynamic URLs to prevent space-encoding 404 bugs -->
+                <a href="{% url 'category_page' 'Fashion' %}" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
                     <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Fashion">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     <div class="absolute bottom-3 left-3">
@@ -272,7 +273,7 @@
                     </div>
                 </a>
 
-                <a href="/category/Food/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                <a href="{% url 'category_page' 'Food' %}" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
                     <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Food">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     <div class="absolute bottom-3 left-3">
@@ -281,7 +282,7 @@
                     </div>
                 </a>
 
-                <a href="/category/Beauty/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                <a href="{% url 'category_page' 'Beauty' %}" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
                     <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Beauty">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     <div class="absolute bottom-3 left-3">
@@ -290,7 +291,7 @@
                     </div>
                 </a>
 
-                <a href="/category/Tech/" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
+                <a href="{% url 'category_page' 'Tech' %}" class="cat-card flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden relative group cursor-pointer opacity-0">
                     <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Tech">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     <div class="absolute bottom-3 left-3">
@@ -308,9 +309,8 @@
                     <h2 class="font-display font-bold text-xl tracking-tight">VIP Spotlight 🔥</h2>
                     <p class="text-zinc-500 text-xs mt-1">The top vendors crushing it right now</p>
                 </div>
-                <!-- CEO FIX: "See All" Button only shows if backend detects more than 10 VIPs -->
                 {% if has_more_vips %}
-                <a href="/vips/" class="text-plug-wa text-sm hover:text-green-400 transition-colors flex items-center gap-1 font-medium">
+                <a href="{% url 'all_vips' %}" class="text-plug-wa text-sm hover:text-green-400 transition-colors flex items-center gap-1 font-medium">
                     See All VIPs <i data-lucide="arrow-right" class="w-3 h-3"></i>
                 </a>
                 {% endif %}
@@ -319,16 +319,23 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {% for vendor in vendors %}
-                <a href="/vendor/{{ vendor.id }}/" class="vendor-card glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row group opacity-0 premium-glow">
+                <a href="{% url 'vendor_profile' vendor.id %}" class="vendor-card glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row group opacity-0 premium-glow">
                     
                     <div class="md:w-40 h-48 md:h-auto overflow-hidden shine-effect">
-                        <img src="{{ vendor.profile_image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ vendor.shop_name }}">
+                        <!-- CEO FIX: Safe Image Fallback -->
+                        {% if vendor.profile_image %}
+                            <img src="{{ vendor.profile_image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ vendor.shop_name }}">
+                        {% else %}
+                            <div class="w-full h-full bg-zinc-800 flex items-center justify-center">
+                                <i data-lucide="store" class="w-8 h-8 text-zinc-600"></i>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="p-5 flex flex-col justify-between flex-grow">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-base group-hover:text-plug-wa transition-colors">{{ vendor.shop_name }}</h3>
+                                <h3 class="font-semibold text-base group-hover:text-plug-wa transition-colors">{{ vendor.shop_name|escape }}</h3>
                                 
                                 <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/30 flex items-center gap-1">
                                     <i data-lucide="star" class="w-2.5 h-2.5 fill-yellow-400 text-yellow-400"></i> PREMIUM
@@ -338,7 +345,7 @@
                             <p class="text-zinc-400 text-xs leading-relaxed mb-3">{{ vendor.description|truncatewords:15 }}</p>
                             
                             <div class="flex items-center gap-3 text-[10px] text-zinc-500">
-                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ vendor.location }}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> {{ vendor.location|escape }}</span>
                                 <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3 h-3"></i> {{ vendor.category }}</span>
                             </div>
                         </div>
@@ -351,7 +358,6 @@
                     </div>
                 </a>
                 {% empty %}
-                    <!-- CEO FIX: Smart Empty State (Fixes the broken button issue) -->
                     <div class="col-span-2 text-center py-16 glass-card rounded-2xl p-8 border-dashed border border-zinc-700">
                         <div class="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-5 border border-yellow-500/20">
                             <i data-lucide="crown" class="w-8 h-8 text-yellow-400"></i>
@@ -359,13 +365,12 @@
                         <h3 class="font-display font-bold text-xl text-white mb-2">The Spotlight is Empty!</h3>
                         <p class="text-zinc-400 text-sm mb-8 max-w-xs mx-auto">Be the first to claim the homepage and get all the buyer traffic!</p>
                         
-                        <!-- Logic: If logged in, send to Upgrade. If not, send to Register -->
                         {% if user.is_authenticated %}
-                            <a href="/upgrade/" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)]">
+                            <a href="{% url 'upgrade_page' %}" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)]">
                                 <i data-lucide="zap" class="w-4 h-4"></i> Upgrade to VIP Now
                             </a>
                         {% else %}
-                            <a href="/register/" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)]">
+                            <a href="{% url 'register' %}" class="inline-flex items-center gap-2 bg-plug-wa text-black font-bold px-8 py-3 rounded-xl hover:bg-green-400 transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.3)]">
                                 <i data-lucide="user-plus" class="w-4 h-4"></i> Register to Claim Top Spot
                             </a>
                         {% endif %}
@@ -386,7 +391,7 @@
             </div>
             
             <p class="text-zinc-500 max-w-sm mx-auto text-sm mb-8">List your plug for free. Reach thousands of buyers instantly and upgrade to Premium when you're ready for the top spot.</p>
-            <a href="/register/" class="inline-flex items-center gap-2 bg-white text-black font-semibold px-8 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm">
+            <a href="{% url 'register' %}" class="inline-flex items-center gap-2 bg-white text-black font-semibold px-8 py-3 rounded-xl hover:bg-zinc-200 transition-colors text-sm">
                 List Your Plug <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
         </section>
@@ -397,7 +402,7 @@
     <footer class="border-t border-zinc-800/50 py-8 text-center text-zinc-600 text-xs">
         <p>&copy; 2024 Spot a Plug. All rights reserved.</p>
         <div class="flex justify-center gap-6 mt-4">
-            <a href="/help/" class="hover:text-white transition-colors">Help Center</a>
+            <a href="{% url 'help_page' %}" class="hover:text-white transition-colors">Help Center</a>
             <a href="https://www.instagram.com/spotaplug/" class="hover:text-white transition-colors">Instagram</a>
             <a href="https://www.tiktok.com/@ehma113" class="hover:text-white transition-colors">TikTok</a>
         </div>
@@ -405,66 +410,31 @@
 
     <!-- GSAP Animation Script -->
     <script>
-        // Initialize Lucide Icons
         lucide.createIcons();
-
-        // Register GSAP Plugin
         gsap.registerPlugin(ScrollTrigger);
 
-        // Hero Animations Timeline
         const heroTl = gsap.timeline({ defaults: { ease: "power4.out" }});
         
         heroTl
-            .from("#hero-text", {
-                y: 100,
-                opacity: 0,
-                duration: 1.2,
-            })
-            .from("#hero-sub", {
-                y: 20,
-                opacity: 0,
-                duration: 0.8,
-            }, "-=0.6")
-            .to("#hero-cta", {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-            }, "-=0.4");
+            .from("#hero-text", { y: 100, opacity: 0, duration: 1.2 })
+            .from("#hero-sub", { y: 20, opacity: 0, duration: 0.8 }, "-=0.6")
+            .to("#hero-cta", { opacity: 1, y: 0, duration: 0.6 }, "-=0.4");
 
-        // Category Scroll Animation
         gsap.to(".cat-card", {
-            x: 0,
-            opacity: 1,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power2.out",
-            scrollTrigger: {
-                trigger: ".cat-card",
-                start: "top 90%",
-                toggleActions: "play none none none"
-            }
+            x: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power2.out",
+            scrollTrigger: { trigger: ".cat-card", start: "top 90%", toggleActions: "play none none none" }
         });
 
-        // Vendor Card Scroll Animation
         gsap.utils.toArray('.vendor-card').forEach((card, i) => {
             gsap.to(card, {
-                y: 0,
-                opacity: 1,
-                duration: 0.8,
-                delay: i % 2 * 0.15,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 90%",
-                    toggleActions: "play none none none"
-                }
+                y: 0, opacity: 1, duration: 0.8, delay: i % 2 * 0.15, ease: "power3.out",
+                scrollTrigger: { trigger: card, start: "top 90%", toggleActions: "play none none none" }
             });
         });
     </script>
 
     <!-- Smart Search Logic (Desktop + Mobile) -->
     <script>
-        // --- DESKTOP SEARCH ---
         const searchInput = document.getElementById('smart-search');
         const resultsContainer = document.getElementById('search-results');
         let debounceTimer;
@@ -473,10 +443,7 @@
             searchInput.addEventListener('input', function() {
                 clearTimeout(debounceTimer);
                 const query = this.value.trim();
-                if (query.length < 2) {
-                    resultsContainer.classList.add('hidden');
-                    return;
-                }
+                if (query.length < 2) { resultsContainer.classList.add('hidden'); return; }
                 debounceTimer = setTimeout(() => fetchSearchResults(query, resultsContainer), 300);
             });
         }
@@ -487,7 +454,6 @@
             }
         });
 
-        // --- MOBILE SEARCH ---
         const mobileOverlay = document.getElementById('mobile-search-overlay');
         const mobileSearchInput = document.getElementById('mobile-smart-search');
         const mobileResultsContainer = document.getElementById('mobile-search-results');
@@ -509,10 +475,7 @@
             mobileSearchInput.addEventListener('input', function() {
                 clearTimeout(debounceTimer);
                 const query = this.value.trim();
-                if (query.length < 2) {
-                    mobileResultsContainer.innerHTML = '';
-                    return;
-                }
+                if (query.length < 2) { mobileResultsContainer.innerHTML = ''; return; }
                 debounceTimer = setTimeout(() => fetchSearchResults(query, mobileResultsContainer), 300);
             });
         }
@@ -523,7 +486,8 @@
             if (targetContainer === resultsContainer) targetContainer.classList.remove('hidden');
 
             try {
-                const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+                // CEO FIX: URL changed from /api/search/ to /search/ to match urls.py!
+                const response = await fetch(`/search/?q=${encodeURIComponent(query)}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
 

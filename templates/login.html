@@ -27,7 +27,8 @@
     <div class="mesh-bg"></div>
 
     <nav class="p-4 flex items-center gap-2">
-        <a href="/" class="flex items-center gap-2 text-zinc-400 hover:text-white transition">
+        <!-- CEO FIX: Dynamic URL -->
+        <a href="{% url 'home' %}" class="flex items-center gap-2 text-zinc-400 hover:text-white transition">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
             <span class="font-display font-bold">Spot a Plug</span>
         </a>
@@ -44,7 +45,8 @@
                 <p class="text-zinc-400 text-sm mt-2">Log in to manage your shop and view your stats.</p>
             </div>
 
-            <form action="/login/" method="POST" class="space-y-5 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+            <!-- CEO FIX: Dynamic URL -->
+            <form action="{% url 'login' %}" method="POST" class="space-y-5 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                 {% csrf_token %}
 
                 <!-- DJANGO ERROR MESSAGE BLOCK -->
@@ -76,8 +78,9 @@
 
             </form>
 
+            <!-- CEO FIX: Dynamic URL -->
             <p class="text-center text-zinc-600 text-xs mt-6">
-                Don't have an account? <a href="/register/" class="text-plug-wa hover:underline">List Your Plug</a>
+                Don't have an account? <a href="{% url 'register' %}" class="text-plug-wa hover:underline">List Your Plug</a>
             </p>
 
         </div>
