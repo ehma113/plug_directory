@@ -38,40 +38,28 @@ def get_client_ip(request):
 # THE 5-STAR RANKING ENGINE (SINGLE SOURCE OF TRUTH)
 # ==========================================
 def compare_vendors(a, b):
-    # 1. CEO GOD MODE OVERRIDE (Highest Priority!)
     if a.rank_score != b.rank_score:
         return b.rank_score - a.rank_score
-
-    # 2. Premium always wins
     if a.is_premium and not b.is_premium:
         return -1
     if not a.is_premium and b.is_premium:
         return 1
-
-    # 3. Higher rating wins
     if a.average_rating > b.average_rating:
         return -1
     if a.average_rating < b.average_rating:
         return 1
-
-    # 4. More reviews wins (Trust signal)
     if a.review_count > b.review_count:
         return -1
     if a.review_count < b.review_count:
         return 1
-
-    # 5. More WhatsApp clicks wins (Popular vendors deserve visibility)
     if a.whatsapp_clicks > b.whatsapp_clicks:
         return -1
     if a.whatsapp_clicks < b.whatsapp_clicks:
         return 1
-
-    # 6. Newest first (Freshness boost)
     if a.user.date_joined > b.user.date_joined:
         return -1
     if a.user.date_joined < b.user.date_joined:
         return 1
-
     return 0
 
 
@@ -106,7 +94,6 @@ def all_vips_page(request):
     all_vips.sort(key=cmp_to_key(compare_vendors))
     return render(request, 'all_vips.html', {'vendors': all_vips})
 
-# CEO FIX: 20 searches per minute per IP!
 @rate_limit_search(max_requests=20, timeout=60)
 def smart_search(request):
     query = request.GET.get('q', '').strip()
@@ -126,10 +113,7 @@ def smart_search(request):
 
     data = []
     for vendor in results:
-        image_url = (
-            "https://images.unsplash.com/photo-1558618666-fcd25c85f82e"
-            "?q=80&w=100&auto=format&fit=crop"
-        )
+        image_url = "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=100&auto=format&fit=crop"
         if vendor.profile_image:
             image_url = vendor.profile_image.url
 
@@ -150,7 +134,6 @@ def vendor_profile(request, vendor_id):
     reviews = vendor.reviews.all()[:3]
     has_more_reviews = vendor.reviews.count() > 3
 
-    # CEO FIX: Check if this IP has already reviewed this vendor in the last hour
     ip_address = get_client_ip(request)
     one_hour_ago = timezone.now() - timedelta(hours=1)
     has_reviewed = Review.objects.filter(vendor=vendor, ip_address=ip_address, created_at__gte=one_hour_ago).exists()
@@ -160,7 +143,7 @@ def vendor_profile(request, vendor_id):
         'gallery_images': vendor.gallery.all(),
         'reviews': reviews,
         'has_more_reviews': has_more_reviews,
-        'has_reviewed': has_reviewed, # Hides the form for 1 hour if they already reviewed
+        'has_reviewed': has_reviewed,
     }
     return render(request, 'vendor_profile.html', context)
 
@@ -168,7 +151,6 @@ def vendor_profile(request, vendor_id):
 def load_more_reviews(request, vendor_id):
     vendor = get_object_or_404(Vendor, id=vendor_id)
     offset = int(request.GET.get('offset', 3))
-    
     reviews = vendor.reviews.all()[offset:offset+5]
     total_reviews = vendor.reviews.count()
     
@@ -182,35 +164,20 @@ def load_more_reviews(request, vendor_id):
         })
     
     has_more = (offset + 5) < total_reviews
-    
     return JsonResponse({'reviews': data, 'has_more': has_more}, safe=False)
 
 
 def discover_page(request):
-    niches = VendorNiche.objects.filter(
-        vendor__is_premium=True, vendor__is_active=True
-    )
+    niches = VendorNiche.objects.filter(vendor__is_premium=True, vendor__is_active=True)
     return render(request, 'discover.html', {'niches': niches})
 
 
 def category_page(request, category_name):
-    # CEO FIX: Normalize the URL string to handle encoding and hyphens
     normalized_name = category_name.replace('-', ' ').replace('%26', '&')
-    
-    all_vendors = list(
-        Vendor.objects.filter(category__iexact=normalized_name, is_active=True)
-    )
+    all_vendors = list(Vendor.objects.filter(category__iexact=normalized_name, is_active=True))
     all_vendors.sort(key=cmp_to_key(compare_vendors))
-    niches = VendorNiche.objects.filter(
-        vendor__category__iexact=normalized_name,
-        vendor__is_premium=True,
-        vendor__is_active=True,
-    )
-    context = {
-        'category_name': normalized_name.title(),
-        'vendors': all_vendors,
-        'niches': niches,
-    }
+    niches = VendorNiche.objects.filter(vendor__category__iexact=normalized_name, vendor__is_premium=True, vendor__is_active=True)
+    context = {'category_name': normalized_name.title(), 'vendors': all_vendors, 'niches': niches}
     return render(request, 'category_listing.html', context)
 
 
@@ -240,10 +207,7 @@ def help_page(request):
                     report, created = VendorReport.objects.get_or_create(
                         vendor=vendor,
                         buyer_email=email,
-                        defaults={
-                            'reason': message_body,
-                            'screenshot': request.FILES.get('report_screenshot'),
-                        },
+                        defaults={'reason': message_body, 'screenshot': request.FILES.get('report_screenshot')},
                     )
 
                     if created:
@@ -253,13 +217,7 @@ def help_page(request):
                             vendor.is_premium = False
                             try:
                                 from django.core.mail import send_mail
-                                send_mail(
-                                    f'🚨 AUTO-BANNED: {vendor.shop_name}',
-                                    f'Vendor {vendor.shop_name} was automatically banned after receiving {vendor.report_count} reports.',
-                                    settings.DEFAULT_FROM_EMAIL,
-                                    ['ehma1023@gmail.com'],
-                                    fail_silently=False,
-                                )
+                                send_mail(f'🚨 AUTO-BANNED: {vendor.shop_name}', f'Vendor {vendor.shop_name} was automatically banned after receiving {vendor.report_count} reports.', settings.DEFAULT_FROM_EMAIL, ['ehma1023@gmail.com'], fail_silently=False)
                             except Exception:
                                 pass
 
@@ -276,13 +234,7 @@ def help_page(request):
         full_message = f"New Support Ticket:\n\nFrom: {name} ({email})\nType: {issue_type}\n\nMessage:\n{message_body}"
         try:
             from django.core.mail import send_mail
-            send_mail(
-                f'Support Ticket: {issue_type}',
-                full_message,
-                settings.DEFAULT_FROM_EMAIL,
-                ['ehma1023@gmail.com'],
-                fail_silently=False,
-            )
+            send_mail(f'Support Ticket: {issue_type}', full_message, settings.DEFAULT_FROM_EMAIL, ['ehma1023@gmail.com'], fail_silently=False)
             messages.success(request, "Message sent! We'll get back to you shortly.")
         except Exception:
             messages.error(request, 'Something went wrong. Please try again.')
@@ -298,13 +250,6 @@ def help_page(request):
 def vendor_register(request):
     error = None
     old_data = request.POST if request.method == 'POST' else None
-    def vendor_register(request):
-        error = None
-    old_data = request.POST if request.method == 'POST' else None
-
-    # CEO FIX: TEMPORARY DEBUGGER - What is Django actually reading?
-    print(f"!!! DEBUG: RESEND KEY = {settings.RESEND_API_KEY}")
-    print(f"!!! DEBUG: FROM EMAIL = {settings.DEFAULT_FROM_EMAIL}")
 
     if request.method == 'POST':
         shop_name = request.POST.get('shop_name')
@@ -323,7 +268,6 @@ def vendor_register(request):
         if whatsapp_number and not whatsapp_number.startswith('+') and not whatsapp_number.startswith('234'):
             whatsapp_number = '234' + whatsapp_number
 
-        # CEO FIX: Friendly, specific validation messages
         if not all([shop_name, category, location, whatsapp_number, email, description, password1, password2]):
             error = "👀 Looks like you missed a spot. Please fill out all the required fields."
         elif password1 != password2:
@@ -336,12 +280,7 @@ def vendor_register(request):
             error = "✉️ A vendor with this Email already exists. Did you mean to Log In?"
 
         if not error:
-            form = UserCreationForm({
-                'username': whatsapp_number,
-                'email': email,
-                'password1': password1,
-                'password2': password2,
-            })
+            form = UserCreationForm({'username': whatsapp_number, 'email': email, 'password1': password1, 'password2': password2})
 
             if form.is_valid():
                 try:
@@ -349,43 +288,24 @@ def vendor_register(request):
                     token = str(uuid.uuid4())
 
                     vendor = Vendor.objects.create(
-                        user=user,
-                        shop_name=shop_name,
-                        category=category,
-                        location=location,
-                        whatsapp_number=whatsapp_number,
-                        description=description,
-                        instagram_link=instagram_link,
-                        profile_image=profile_image,
-                        cover_image=cover_image,
-                        is_premium=False,
-                        has_used_trial=False,
-                        is_email_verified=False,
-                        email_verification_token=token,
+                        user=user, shop_name=shop_name, category=category, location=location,
+                        whatsapp_number=whatsapp_number, description=description, instagram_link=instagram_link,
+                        profile_image=profile_image, cover_image=cover_image, is_premium=False,
+                        has_used_trial=False, is_email_verified=False, email_verification_token=token,
                     )
 
                     verify_url = f"{request.scheme}://{request.get_host()}/verify-email/{token}/"
                     try:
                         from django.core.mail import send_mail
                         html_message = render_to_string('emails/verify_email.html', {'shop_name': shop_name, 'verify_url': verify_url})
-                        send_mail(
-                            'Spot a Plug - Verify Your Email',
-                            f'Hi {shop_name}! Please verify your account: {verify_url}',
-                            settings.DEFAULT_FROM_EMAIL,
-                            [email],
-                            fail_silently=False,
-                            html_message=html_message,
-                        )
+                        send_mail('Spot a Plug - Verify Your Email', f'Hi {shop_name}! Please verify your account: {verify_url}', settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False, html_message=html_message)
                     except Exception as e:
-                        # CEO FIX: TEMPORARY DEBUGGER - This will crash the page and show us the exact Resend error!
-                        print(f"!!! EMAIL ERROR: {e} !!!")
-                        raise e
+                        pass # We silently pass so the user can still use the "Resend" button later
 
                     login(request, user)
                     return redirect('resend_verification')
 
                 except ValidationError as e:
-                    # CEO FIX: Translate Image Bouncer errors into friendly messages
                     error_dict = str(e)
                     if 'too large' in error_dict:
                         error = "📸 Your image is too large! Please keep it under 5MB."
@@ -396,28 +316,18 @@ def vendor_register(request):
                 except Exception as e:
                     error = str(e)
             else:
-                # CEO FIX: Translate ugly Django form errors into friendly messages
                 for field, errors in form.errors.items():
                     for e in errors:
                         if 'password' in field.lower():
-                            if 'common' in e.lower():
-                                error = "🔒 That password is too common. Please choose something more unique."
-                            elif 'similar' in e.lower():
-                                error = "🔒 Your password is too similar to your other info. Make it more random."
-                            elif 'numeric' in e.lower():
-                                error = "🔒 Your password can't be entirely numbers. Add some letters!"
-                            else:
-                                error = "🔒 Your password isn't strong enough. Try adding numbers, symbols, and uppercase letters."
-                        elif 'email' in field.lower():
-                            error = "✉️ That doesn't look like a valid email address."
-                        else:
-                            error = "⚠️ Please double-check your info and try again."
+                            if 'common' in e.lower(): error = "🔒 That password is too common. Please choose something more unique."
+                            elif 'similar' in e.lower(): error = "🔒 Your password is too similar to your other info. Make it more random."
+                            elif 'numeric' in e.lower(): error = "🔒 Your password can't be entirely numbers. Add some letters!"
+                            else: error = "🔒 Your password isn't strong enough. Try adding numbers, symbols, and uppercase letters."
+                        elif 'email' in field.lower(): error = "✉️ That doesn't look like a valid email address."
+                        else: error = "⚠️ Please double-check your info and try again."
                         break
-                    if error:
-                        break
-                
-                if not error:
-                    error = "👀 Looks like something went wrong. Please check the form and try again."
+                    if error: break
+                if not error: error = "👀 Looks like something went wrong. Please check the form and try again."
 
     context = {'error': error, 'old_data': old_data}
     return render(request, 'register.html', context)
@@ -450,17 +360,9 @@ def resend_verification(request):
         try:
             from django.core.mail import send_mail
             html_message = render_to_string('emails/verify_email.html', {'shop_name': vendor.shop_name, 'verify_url': verify_url})
-            send_mail(
-                'Spot a Plug - Verify Your Email',
-                f'Hi {vendor.shop_name}! Please verify your account: {verify_url}',
-                settings.DEFAULT_FROM_EMAIL,
-                [request.user.email],
-                fail_silently=False,
-                html_message=html_message,
-            )
+            send_mail('Spot a Plug - Verify Your Email', f'Hi {vendor.shop_name}! Please verify your account: {verify_url}', settings.DEFAULT_FROM_EMAIL, [request.user.email], fail_silently=False, html_message=html_message)
             messages.success(request, 'A new verification email has been sent!')
         except Exception as e:
-            # CEO FIX: Show us the error!
             messages.error(request, f'Could not send email. Error: {e}')
 
         return redirect(reverse('resend_verification'))
@@ -475,11 +377,10 @@ def vendor_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # CEO FIX: Ensure username matches DB format (2348012345678)
         if username:
-            username = username.strip().replace('+', '') # Remove spaces and plus signs
+            username = username.strip().replace('+', '')
             if not username.startswith('234') and username.startswith('0'):
-                username = '234' + username[1:] # Convert 0801... to 234801...
+                username = '234' + username[1:]
 
         user = authenticate(request, username=username, password=password)
 
@@ -522,11 +423,7 @@ def upgrade_page(request):
         messages.error(request, "You must verify your email before upgrading to Premium.")
         return redirect('vendor_dashboard')
     
-    new_payment = Payment.objects.create(
-        vendor=vendor,
-        amount=2000000, # CEO FIX: ₦20,000 in kobo
-        reference=f"SAP-{uuid.uuid4().hex[:10]}"
-    )
+    new_payment = Payment.objects.create(vendor=vendor, amount=2000000, reference=f"SAP-{uuid.uuid4().hex[:10]}")
     
     context = {
         'vendor': vendor,
@@ -543,10 +440,7 @@ def verify_payment(request, reference):
         return redirect('vendor_dashboard') 
 
     url = f"https://api.paystack.co/transaction/verify/{reference}"
-    headers = {
-        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-        "Content-Type": "application/json",
-    }
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}", "Content-Type": "application/json"}
     response = requests.get(url, headers=headers)
     data = response.json()
     vendor = get_object_or_404(Vendor, user=request.user)
@@ -565,10 +459,7 @@ def verify_payment(request, reference):
         vendor.save()
 
         auth_code = data['data']['authorization']['authorization_code']
-        PaymentAuth.objects.update_or_create(
-            vendor=vendor,
-            defaults={'paystack_auth_code': auth_code, 'is_active': True},
-        )
+        PaymentAuth.objects.update_or_create(vendor=vendor, defaults={'paystack_auth_code': auth_code, 'is_active': True})
         return redirect('vendor_dashboard')
     
     messages.error(request, "Payment verification failed. Please try again.")
@@ -587,14 +478,10 @@ def manage_shop(request):
             try:
                 VendorGallery.objects.create(vendor=vendor, image=image, caption=caption)
             except ValidationError as e:
-                # CEO FIX: Image Bouncer caught a bad file!
                 messages.error(request, str(e))
                 return redirect('manage_shop')
         return redirect('manage_shop')
-    return render(request, 'manage_shop.html', {
-        'vendor': vendor,
-        'limit_error': request.GET.get('error') == 'limit',
-    })
+    return render(request, 'manage_shop.html', {'vendor': vendor, 'limit_error': request.GET.get('error') == 'limit'})
 
 
 @login_required(login_url='/login/')
@@ -625,17 +512,12 @@ def edit_shop(request):
             vendor.instagram_link = instagram_link
             vendor.description = description
             
-            # CEO FIX: Image Bouncer on Edit
             if new_profile_image:
-                try:
-                    vendor.profile_image = new_profile_image
-                except ValidationError as e:
-                    error = str(e)
+                try: vendor.profile_image = new_profile_image
+                except ValidationError as e: error = str(e)
             if new_cover_image:
-                try:
-                    vendor.cover_image = new_cover_image
-                except ValidationError as e:
-                    error = str(e)
+                try: vendor.cover_image = new_cover_image
+                except ValidationError as e: error = str(e)
                     
             if not error:
                 vendor.save()
@@ -731,20 +613,14 @@ def submit_review(request, vendor_id):
     vendor = get_object_or_404(Vendor, id=vendor_id)
 
     if request.method == 'POST':
-        # CEO FIX: HONEYPOT CHECK (Bots fill out hidden fields)
         honeypot = request.POST.get('website_url')
         if honeypot:
             return redirect('vendor_profile', vendor_id=vendor.id)
 
-        # CEO FIX: 1-HOUR IP RATE LIMITER
         ip_address = get_client_ip(request)
         one_hour_ago = timezone.now() - timedelta(hours=1)
         
-        recent_review_exists = Review.objects.filter(
-            vendor=vendor, 
-            ip_address=ip_address, 
-            created_at__gte=one_hour_ago
-        ).exists()
+        recent_review_exists = Review.objects.filter(vendor=vendor, ip_address=ip_address, created_at__gte=one_hour_ago).exists()
 
         if recent_review_exists:
             messages.error(request, "You've already left a review for this shop recently. Please wait an hour.")
@@ -755,13 +631,7 @@ def submit_review(request, vendor_id):
         comment = request.POST.get('comment')
 
         if buyer_name and rating and comment:
-            Review.objects.create(
-                vendor=vendor,
-                buyer_name=buyer_name,
-                rating=int(rating),
-                comment=comment,
-                ip_address=ip_address,
-            )
+            Review.objects.create(vendor=vendor, buyer_name=buyer_name, rating=int(rating), comment=comment, ip_address=ip_address)
             messages.success(request, 'Thanks for your review!')
         else:
             messages.error(request, 'Please fill out all review fields.')
@@ -777,10 +647,7 @@ def track_whatsapp_click(request, vendor_id):
     vendor = get_object_or_404(Vendor, id=vendor_id)
     vendor.whatsapp_clicks += 1
     vendor.save(update_fields=['whatsapp_clicks'])
-    return redirect(
-        f"https://wa.me/{vendor.whatsapp_number}"
-        f"?text=Hi%20{vendor.shop_name}%2C%20I%20saw%20your%20shop%20on%20Spot%20a%20Plug."
-    )
+    return redirect(f"https://wa.me/{vendor.whatsapp_number}?text=Hi%20{vendor.shop_name}%2C%20I%20saw%20your%20shop%20on%20Spot%20a%20Plug.")
 
 
 def track_instagram_click(request, vendor_id):
