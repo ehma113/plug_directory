@@ -578,33 +578,31 @@ def cancel_premium(request):
         messages.success(request, "Auto-renewal cancelled. You will keep your Premium benefits until your current plan expires.")
     return redirect('vendor_dashboard')
 
-
 # ==========================================
-# 4. GOD MODE (ADMIN TOGGLES) - CSRF PROTECTED
+# 4. GOD MODE (ADMIN TOGGLES) - DIRECT LINKS
 # ==========================================
 
 def admin_toggle_premium(request, vendor_id):
     if not request.user.is_staff:
         return redirect(f'/admin/login/?next=/admin/toggle-premium/{vendor_id}/')
-    if request.method == 'POST':
-        vendor = get_object_or_404(Vendor, id=vendor_id)
-        vendor.is_premium = not vendor.is_premium
-        vendor.save()
+    # CEO FIX: Accept GET requests for one-click admin toggles
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    vendor.is_premium = not vendor.is_premium
+    vendor.save()
     return redirect('/admin/plugs/vendor/')
 
 
 def admin_toggle_active(request, vendor_id):
     if not request.user.is_staff:
         return redirect(f'/admin/login/?next=/admin/toggle-active/{vendor_id}/')
-    if request.method == 'POST':
-        vendor = get_object_or_404(Vendor, id=vendor_id)
-        vendor.is_active = not vendor.is_active
-        if vendor.is_active:
-            vendor.report_count = 0
-        vendor.save()
+
+    # CEO FIX: Accept GET requests for one-click admin toggles
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    vendor.is_active = not vendor.is_active
+    if vendor.is_active:
+        vendor.report_count = 0
+    vendor.save()
     return redirect('/admin/plugs/vendor/')
-
-
 # ==========================================
 # 5. 5-STAR REVIEW ENGINE (FORTIFIED)
 # ==========================================
