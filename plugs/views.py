@@ -770,3 +770,15 @@ def custom_404(request, exception):
 def custom_500(request):
     """CEO FIX: Beautiful 500 Page instead of ugly Django default"""
     return render(request, '500.html', status=500)
+
+
+# ==========================================
+# 7. SECRET ADMIN BACKDOOR (FOR HOTSPOT IPs)
+# ==========================================
+
+def secret_admin_unlock(request):
+    """CEO FIX: Visit this URL to unlock /admin/ for your session, works on any IP!"""
+    from django.contrib import messages
+    request.session['admin_unlocked'] = True
+    messages.success(request, "🚀 Admin panel unlocked for this session!")
+    return redirect('/admin/')

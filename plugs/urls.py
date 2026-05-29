@@ -59,4 +59,6 @@ urlpatterns = [
     # ==========================================
     path('admin/toggle-premium/<int:vendor_id>/', views.admin_toggle_premium, name='admin_toggle_premium'), 
     path('admin/toggle-active/<int:vendor_id>/', views.admin_toggle_active, name='admin_toggle_active'),
+        # CEO FIX: Secret Admin Backdoor (Change 'secret-ceo-login' to something unique only you know!)
+    path('secret-ceo-login/', views.secret_admin_unlock, name='secret_admin_unlock'),
 ]
