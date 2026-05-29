@@ -106,7 +106,7 @@ def all_vips_page(request):
     all_vips.sort(key=cmp_to_key(compare_vendors))
     return render(request, 'all_vips.html', {'vendors': all_vips})
 
-# CEO FIX: 10 searches per minute per IP!
+# CEO FIX: 20 searches per minute per IP!
 @rate_limit_search(max_requests=20, timeout=60)
 def smart_search(request):
     query = request.GET.get('q', '').strip()
@@ -195,7 +195,6 @@ def discover_page(request):
 
 def category_page(request, category_name):
     # CEO FIX: Normalize the URL string to handle encoding and hyphens
-    # Converts "hair-and-wigs" or "Hair%20&%20Wigs" to "Hair & Wigs"
     normalized_name = category_name.replace('-', ' ').replace('%26', '&')
     
     all_vendors = list(
@@ -208,7 +207,7 @@ def category_page(request, category_name):
         vendor__is_active=True,
     )
     context = {
-        'category_name': normalized_name.title(), # Ensures it looks pretty on the page
+        'category_name': normalized_name.title(),
         'vendors': all_vendors,
         'niches': niches,
     }
@@ -317,12 +316,17 @@ def vendor_register(request):
         if whatsapp_number and not whatsapp_number.startswith('+') and not whatsapp_number.startswith('234'):
             whatsapp_number = '234' + whatsapp_number
 
-        if password1 != password2:
-            error = "Passwords do not match."
+        # CEO FIX: Friendly, specific validation messages
+        if not all([shop_name, category, location, whatsapp_number, email, description, password1, password2]):
+            error = "👀 Looks like you missed a spot. Please fill out all the required fields."
+        elif password1 != password2:
+            error = "🔓 Your passwords don't match. Please type them again carefully."
+        elif len(password1) < 8:
+            error = "🔒 Your password is too short. It needs at least 8 characters to be secure."
         elif User.objects.filter(username=whatsapp_number).exists():
-            error = "A vendor with this WhatsApp number already exists."
+            error = "📱 A vendor with this WhatsApp number already exists. Did you mean to Log In?"
         elif User.objects.filter(email=email).exists():
-            error = "A vendor with this Email already exists."
+            error = "✉️ A vendor with this Email already exists. Did you mean to Log In?"
 
         if not error:
             form = UserCreationForm({
@@ -365,24 +369,48 @@ def vendor_register(request):
                             fail_silently=False,
                             html_message=html_message,
                         )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        # CEO FIX: TEMPORARY DEBUGGER - This will crash the page and show us the exact Resend error!
+                        print(f"!!! EMAIL ERROR: {e} !!!")
+                        raise e
 
                     login(request, user)
                     return redirect('resend_verification')
 
                 except ValidationError as e:
-                    # CEO FIX: Image Bouncer caught a bad file!
-                    error = str(e)
+                    # CEO FIX: Translate Image Bouncer errors into friendly messages
+                    error_dict = str(e)
+                    if 'too large' in error_dict:
+                        error = "📸 Your image is too large! Please keep it under 5MB."
+                    elif 'not a valid image' in error_dict:
+                        error = "🚫 That doesn't look like a real image. Please upload a JPG or PNG."
+                    else:
+                        error = "⚠️ Something went wrong with your images. Please try a different file."
                 except Exception as e:
                     error = str(e)
             else:
+                # CEO FIX: Translate ugly Django form errors into friendly messages
                 for field, errors in form.errors.items():
                     for e in errors:
-                        error = e
+                        if 'password' in field.lower():
+                            if 'common' in e.lower():
+                                error = "🔒 That password is too common. Please choose something more unique."
+                            elif 'similar' in e.lower():
+                                error = "🔒 Your password is too similar to your other info. Make it more random."
+                            elif 'numeric' in e.lower():
+                                error = "🔒 Your password can't be entirely numbers. Add some letters!"
+                            else:
+                                error = "🔒 Your password isn't strong enough. Try adding numbers, symbols, and uppercase letters."
+                        elif 'email' in field.lower():
+                            error = "✉️ That doesn't look like a valid email address."
+                        else:
+                            error = "⚠️ Please double-check your info and try again."
                         break
+                    if error:
+                        break
+                
                 if not error:
-                    error = "Please ensure all fields are filled correctly."
+                    error = "👀 Looks like something went wrong. Please check the form and try again."
 
     context = {'error': error, 'old_data': old_data}
     return render(request, 'register.html', context)
@@ -424,8 +452,9 @@ def resend_verification(request):
                 html_message=html_message,
             )
             messages.success(request, 'A new verification email has been sent!')
-        except Exception:
-            messages.error(request, 'Could not send email. Please try again later.')
+        except Exception as e:
+            # CEO FIX: Show us the error!
+            messages.error(request, f'Could not send email. Error: {e}')
 
         return redirect(reverse('resend_verification'))
 
@@ -668,7 +697,6 @@ def cancel_premium(request):
 def admin_toggle_premium(request, vendor_id):
     if not request.user.is_staff:
         return redirect(f'/admin/login/?next=/admin/toggle-premium/{vendor_id}/')
-    # CEO FIX: Enforce POST method for CSRF security
     if request.method == 'POST':
         vendor = get_object_or_404(Vendor, id=vendor_id)
         vendor.is_premium = not vendor.is_premium
@@ -679,8 +707,6 @@ def admin_toggle_premium(request, vendor_id):
 def admin_toggle_active(request, vendor_id):
     if not request.user.is_staff:
         return redirect(f'/admin/login/?next=/admin/toggle-active/{vendor_id}/')
-
-    # CEO FIX: Enforce POST method for CSRF security
     if request.method == 'POST':
         vendor = get_object_or_404(Vendor, id=vendor_id)
         vendor.is_active = not vendor.is_active
@@ -701,7 +727,6 @@ def submit_review(request, vendor_id):
         # CEO FIX: HONEYPOT CHECK (Bots fill out hidden fields)
         honeypot = request.POST.get('website_url')
         if honeypot:
-            # It's a bot! Silently redirect them without saving.
             return redirect('vendor_profile', vendor_id=vendor.id)
 
         # CEO FIX: 1-HOUR IP RATE LIMITER
@@ -728,7 +753,7 @@ def submit_review(request, vendor_id):
                 buyer_name=buyer_name,
                 rating=int(rating),
                 comment=comment,
-                ip_address=ip_address, # Save it for the 1-hour throttle check!
+                ip_address=ip_address,
             )
             messages.success(request, 'Thanks for your review!')
         else:
@@ -759,25 +784,23 @@ def track_instagram_click(request, vendor_id):
         return redirect(vendor.instagram_link)
     return redirect('vendor_profile', vendor_id=vendor.id)
 
+
 # ==========================================
 # 7. CUSTOM BEAUTIFUL ERROR PAGES
 # ==========================================
 
 def custom_404(request, exception):
-    """CEO FIX: Beautiful 404 Page instead of ugly Django default"""
     return render(request, '404.html', status=404)
 
 def custom_500(request):
-    """CEO FIX: Beautiful 500 Page instead of ugly Django default"""
     return render(request, '500.html', status=500)
 
 
 # ==========================================
-# 7. SECRET ADMIN BACKDOOR (FOR HOTSPOT IPs)
+# 8. SECRET ADMIN BACKDOOR (FOR HOTSPOT IPs)
 # ==========================================
 
 def secret_admin_unlock(request):
-    """CEO FIX: Visit this URL to unlock /admin/ for your session, works on any IP!"""
     from django.contrib import messages
     request.session['admin_unlocked'] = True
     messages.success(request, "🚀 Admin panel unlocked for this session!")
