@@ -298,6 +298,13 @@ def help_page(request):
 def vendor_register(request):
     error = None
     old_data = request.POST if request.method == 'POST' else None
+    def vendor_register(request):
+        error = None
+    old_data = request.POST if request.method == 'POST' else None
+
+    # CEO FIX: TEMPORARY DEBUGGER - What is Django actually reading?
+    print(f"!!! DEBUG: RESEND KEY = {settings.RESEND_API_KEY}")
+    print(f"!!! DEBUG: FROM EMAIL = {settings.DEFAULT_FROM_EMAIL}")
 
     if request.method == 'POST':
         shop_name = request.POST.get('shop_name')
